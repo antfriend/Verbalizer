@@ -1,0 +1,86 @@
+' =========================================================================
+'
+'   File...... ADC MCP3208 demo.bs2
+'   Purpose... MCP3208 Demo
+'   Author.... Technical Support -- Parallax, Inc.
+'   E-mail.... support@parallax.com
+'   Started... 8/20/09
+'   Updated... N/A
+'
+'   {$STAMP BS2}
+'   {$PBASIC 2.5}
+'
+' =========================================================================
+
+
+' -----[ Program Description ]---------------------------------------------
+
+'  This demo uses the wipers on 2 10K Ohm pots to provide an analog voltage
+' for channels 0,2,4,6 and 1,3,5,7 on the ADC; then displays the voltage and
+' 12-Bit value for each channel on the DEBUG terminal. Using a 5 VDC reference
+' the 12-bit values should be roughly 0 TO 4096 and the voltage from 0 to 5
+
+' -----[ Revision History ]------------------------------------------------
+
+  ' N/A
+
+' -----[ I/O Definitions ]-------------------------------------------------
+
+CS              PIN     0                         ' Chip Select   (MCP3204.10)
+Clock           PIN     1                         ' Clock         (MCP3204.13)
+DataOut         PIN     2                         ' Dout on ADC   (MCP3204.12)
+DataIn          PIN     3                         ' Din on ADC    (MCP3204.11)
+
+' -----[ Constants ]-------------------------------------------------------
+
+Cnts2Mv         CON     $0139                     ' x 1.22 (To Millivolts)
+Offset          CON     24
+
+' -----[ Variables ]-------------------------------------------------------
+
+ypos            VAR     Nib                       ' Y position for display
+channel         VAR     Nib                       ' Channel selection
+results         VAR     Word                      ' Conversion Results
+mVolts          VAR     Word                      ' Results --> mVolts
+
+' -----[ Init Setup ]------------------------------------------------------
+
+DEBUG CLS, "ADC CH 0 : ", CR, "Volts    :", CR,
+           "ADC CH 1 : ", CR, "Volts    :", CR,
+           "ADC CH 2 : ", CR, "Volts    :", CR,
+           "ADC CH 3 : ", CR, "Volts    :", CR,
+           "ADC CH 4 : ", CR, "Volts    :", CR,
+           "ADC CH 5 : ", CR, "Volts    :", CR,
+           "ADC CH 6 : ", CR, "Volts    :", CR,
+           "ADC CH 7 : ", CR, "Volts    :", CR
+
+' -----[ Program Code ]----------------------------------------------------
+
+ypos = 0
+
+DO
+
+  FOR channel = 0 TO 7
+    GOSUB GetADC
+    GOSUB DisplayADC
+    PAUSE 20
+  NEXT
+
+LOOP
+
+
+  GetADC:
+    LOW CS
+    SHIFTOUT DataIn, Clock, MSBFIRST, [ Offset | channel ]
+    SHIFTIN DataOut, Clock, MSBPOST, [results\13]
+    HIGH CS
+    mVolts = results */ Cnts2Mv                          ' Convert To Millivolts
+  RETURN
+
+  DisplayADC:
+    DEBUG HOME, CRSRXY, 11, ypos, DEC results, CLREOL,CR
+    ypos = ypos + 1
+    DEBUG CRSRXY, 11, ypos, DEC mVolts DIG 3, ".", DEC3 mVolts,CLREOL
+    ypos = ypos + 1
+    IF ypos > 15 THEN ypos = 0
+  RETURN
