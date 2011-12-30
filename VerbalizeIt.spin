@@ -2,7 +2,7 @@ CON
      _CLKMODE = XTAL1 + PLL16X
      _XINFREQ = 5_000_000
 
-        voices = 4              'voices can be 1..4
+        voices = 3              'voices can be 1..4
         buffer_size = $1000     'spatializer buffer size
 
 OBJ

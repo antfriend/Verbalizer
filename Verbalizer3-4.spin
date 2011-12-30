@@ -75,7 +75,7 @@ PRI initialize_pins
 
 PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
       initialize_pins
-      Run_LCD
+      'Run_LCD
       blah.start
                                                                               
 '*****MAIN LOOP*************************************************************************************************************

@@ -15,8 +15,8 @@ PUB go(da_gp)  'say "blah"
     'randomize some values ********************************
     'gp := rnd(60, 120)          'random glottal pitch
     gp := da_gp 'rnd(60, 120)
-    vp := 4 'rnd(4, 48)            'random vibrato pitch
-    vr := 12 'rnd(4, 30)            'random vibrato rate
+    vp := 2 'rnd(4, 48)            'random vibrato pitch
+    vr := 92 'rnd(4, 52)            'random vibrato rate
 
   setformants(100, 200, 2800, 3750)
   'v.go(rnd(100, 1000))
@@ -32,9 +32,11 @@ PUB go(da_gp)  'say "blah"
   setformants(730, 1050, 2500, 3480)
   aa := 20
   ga := 30
+  na := 100       'added
+  nf := 200      'added
   v.go(50)
 
-  v.go(400)'(rnd(200, 1000))
+  v.go(800)'(rnd(200, 1000))
   gone
 
 PUB gone
