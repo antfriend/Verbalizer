@@ -47,6 +47,8 @@ PUB go_available(the_key) | i, r, voice_number, the_pitch
 
   the_pitch := the_key + 12 '0-23 or 12 see table in FrequencyTable.xls
   the_pitch := the_pitch * 4
+
+  'need to either limit use to one or something
                     
   repeat i from 0 to voices -1
       if v[i].done
