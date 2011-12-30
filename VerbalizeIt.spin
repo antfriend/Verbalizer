@@ -43,15 +43,16 @@ PUB stop_this_voice(voice_number)
   'else
      'v[voice_number].gone
 
-PUB go_available(da_gp) | i, r, voice_number
-  {i := 0
-  v[i].go(da_gp)
-  }
+PUB go_available(the_key) | i, r, voice_number, the_pitch
+
+  the_pitch := the_key + 12 '0-23 or 12 see table in FrequencyTable.xls
+  the_pitch := the_pitch * 4
+                    
   repeat i from 0 to voices -1
       if v[i].done
-          angle[i] := 32768 '?r 'random angle
+          angle[i] := (37 - the_key) * 1771  '65535..32768..0 ~ L..mid..R
           depth[i] := 32768'?r & $FFF 'random depth
-          v[i].go(da_gp)
+          v[i].go(the_pitch)
           voice_number := i
           return voice_number
           

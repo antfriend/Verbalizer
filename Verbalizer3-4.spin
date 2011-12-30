@@ -73,7 +73,7 @@ PRI initialize_pins
       outa[21..22]~  'set low
              
 
-PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key, the_pitch
+PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key' the_pitch
       initialize_pins
       Run_LCD
       blah.start
@@ -116,10 +116,10 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key, the_pitch
                  'wait_this_fraction_of_a_second(4)
                  'CogQueue[the_key] := Play_One(the_key*20)
                  'start a talking cog
-                  the_pitch := the_key + 12 '0-23 or 12 see table in FrequencyTable.xls
-                  the_pitch := the_pitch * 4
+                  'the_pitch := the_key + 12 '0-23 or 12 see table in FrequencyTable.xls
+                  'the_pitch := the_pitch * 4
                   'CogQueue[the_key] := Say_One(the_pitch)'(60, 120){4-244}[33hz-1047hz]
-                  CogQueue[the_key] := blah.go_available(the_pitch)
+                  CogQueue[the_key] := blah.go_available(the_key)
                  
              if (Key_State[the_key] == RELEASE)'caught a release
                  Key_PreviousState[the_key] := Key_State[the_key]
