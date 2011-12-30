@@ -20,7 +20,7 @@ PUB go(da_gp)  'say "blah"
 
   setformants(100, 200, 2800, 3750)
   'v.go(rnd(100, 1000))
-  v.go(1)
+  v.go(1) ' 1.4 milliseconds
   
   setformants(400, 850, 2800, 3750)
   aa := 10
