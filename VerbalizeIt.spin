@@ -11,11 +11,13 @@ OBJ
 
 VAR
         'spatializer parameters
-        word input[4], angle[4], depth[4], knobs
+        word input[voices], angle[voices], depth[voices], knobs
 
         'spatial delay buffer
         long buffer[buffer_size]
         byte stop_signal
+        long key_index[voices]
+        long status[voices]
         
 PUB start | i, r
     stop_signal := 1
@@ -48,7 +50,9 @@ PUB go_available(the_key) | i, r, voice_number, the_pitch
   the_pitch := the_key + 12 '0-23 or 12 see table in FrequencyTable.xls
   the_pitch := the_pitch * 4
 
-  'need to either limit use to one or something
+  'check if this key is already in use on one of the 4 voices
+
+  'check if it is done or not
                     
   repeat i from 0 to voices -1
       if v[i].done
