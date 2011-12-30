@@ -11,15 +11,17 @@ PUB start
     v.start(@aa, -1, -1, -1) 'start tract, no pin outputs
     return v.sample_ptr
 
-PUB go  'say "blah"
+PUB go(da_gp)  'say "blah"
     'randomize some values ********************************
-    gp := rnd(60, 120)          'random glottal pitch
-    vp := rnd(4, 48)            'random vibrato pitch
-    vr := rnd(4, 30)            'random vibrato rate
+    'gp := rnd(60, 120)          'random glottal pitch
+    gp := da_gp 'rnd(60, 120)
+    vp := 4 'rnd(4, 48)            'random vibrato pitch
+    vr := 12 'rnd(4, 30)            'random vibrato rate
 
   setformants(100, 200, 2800, 3750)
-  v.go(rnd(100, 1000))
-
+  'v.go(rnd(100, 1000))
+  v.go(1)
+  
   setformants(400, 850, 2800, 3750)
   aa := 10
   ga := 20
@@ -32,11 +34,15 @@ PUB go  'say "blah"
   ga := 30
   v.go(50)
 
-  v.go(rnd(200, 1000))
+  v.go(400)'(rnd(200, 1000))
+  gone
+
+PUB gone
 
   aa := 0
   ga := 0
-  v.go(100)
+  v.go(50)'50
+
 
 PUB done
     return v.empty

@@ -17,10 +17,10 @@ VAR
         long buffer[buffer_size]
         byte stop_signal
         
-PUB start | i, r
+PUB start(da_gp) | i, r
     stop_signal := 1
     repeat i from 0 to voices -1
-        input[i] := v[i].start   'to spatializer inputs
+        input[i] := v[i].start(da_gp)   'to spatializer inputs
 
     knobs :=  %000_011_100_101   'start spatializer
     s.start(@input, @buffer, buffer_size, 11, -1, 10, -1)
@@ -30,6 +30,7 @@ PUB start | i, r
         if v[i].done
           angle[i] := ?r 'random angle
           depth[i] := ?r & $FFF 'random depth
+          
           v[i].go
 
 PUB stop
