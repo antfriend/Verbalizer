@@ -33,31 +33,19 @@ VAR
       
 OBJ
         LCD        :               "Serial_Lcd"
-        'talk       :               "Talk"               'synthesized speech
         blah       :               "VerbalizeIt"
    
 PRI Update_this_Keys_State(the_key, is_pressed) | the_count_now
+
   if (is_pressed == TRUE)
     if (Key_State[the_key] <> SUSTAIN)
        Key_State[the_key] := TRIGGER
   else
-    if (Key_State[the_key] > SILENCE)
-       Key_State[the_key] := RELEASE
-    
-PRI display_state_of_this_key(the_key)'assumes values lower or key increments above the LCD cursor positions
-  if (the_key < 33)
-    'LCD_home_then_here(the_key-1)'lcd is base 0
-    'send(char_from_number(Key_State[the_key]))
-    if(Key_State[the_key] == SILENCE)
-      'send("*")
-    if (Key_State[the_key] == TRIGGER)
-      'send("T")
     if (Key_State[the_key] == SUSTAIN)
-      'send("S")
-    if (Key_State[the_key] == RELEASE)
-      'send("R")
+       Key_State[the_key] := RELEASE
 
-PRI wait_this_fraction_of_a_second(the_decimal)'1/the_decimal, e.g. 1/2, 1/4th, 1/10   
+PRI wait_this_fraction_of_a_second(the_decimal)'1/the_decimal, e.g. 1/2, 1/4th, 1/10
+
   waitcnt(clkfreq / the_decimal + cnt)'if the_decimal=4, then we wait 1/4 sec
 
 PRI initialize_pins 
@@ -74,6 +62,7 @@ PRI initialize_pins
              
 
 PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
+
       initialize_pins
       'Run_LCD
       blah.start
@@ -81,7 +70,7 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
 '*****MAIN LOOP*************************************************************************************************************
       repeat 'main loop
         
-        wait_this_fraction_of_a_second(128)
+        'wait_this_fraction_of_a_second(128)
         repeat Keyboard_Quadrant_Index from 1 to 33 step 8'iterate through the Keyboard_Quadrant_Index
           'All go low
           outa[14..16]~  'set low
@@ -100,39 +89,29 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
 
               if(ina[Keyboard_Key_Index] == 1)
                 Update_this_Keys_State(the_key, TRUE)
+                
+                
               else
-                Update_this_Keys_State(the_key, FALSE)            
+                Update_this_Keys_State(the_key, FALSE)
+                            
 
-          'now compare against previous state values and update LCD
+          
         repeat the_key from 1 to 37
-          if (Key_State[the_key] == Key_PreviousState[the_key])
-             'do nothing
-          else
-             
-             display_state_of_this_key(the_key)
              if (Key_State[the_key] == TRIGGER)'caught a trigger
                  
                  if blah.go_if_available(the_key)'if this one starts a voice, then advance to SUSTAIN
-                     Key_PreviousState[the_key] := Key_State[the_key]
                      Key_State[the_key] := SUSTAIN  'advance to sustain
+                     'Key_PreviousState[the_key] := Key_State[the_key]
                  
              if (Key_State[the_key] == RELEASE)'caught a release
-
                  if blah.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
-                     Key_PreviousState[the_key] := Key_State[the_key]
                      Key_State[the_key] := SILENCE  'advance to silence
+                     'Key_PreviousState[the_key] := Key_State[the_key]
+                     
+          'Key_PreviousState[the_key] := Key_State[the_key]           
                  
 '*****END MAIN LOOP*************************************************************************************************************         
      
-PRI This_Key_Pressed(Quadrant, Key)
-  'print to LCD
-  'LCD_home_then_here(Quadrant)
-  'wait_this_fraction_of_a_second(32)
-  'send(char_from_number(Quadrant))
-  'send(",")
-  'send(char_from_number(Key))
-  'send(" ")
-  'wait_this_fraction_of_a_second(32)
    
 PRI Run_LCD
     
