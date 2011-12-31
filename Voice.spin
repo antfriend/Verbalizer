@@ -36,8 +36,8 @@ PUB go(da_gp)  'say "blah"
   nf := 200      'added
   v.go(50)
 
-  v.go(800)'(rnd(200, 1000))
-  gone
+  v.go(200)'(rnd(200, 1000))
+  'gone
 
 PUB gone
 

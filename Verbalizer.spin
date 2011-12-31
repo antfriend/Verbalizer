@@ -111,20 +111,16 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
              
              display_state_of_this_key(the_key)
              if (Key_State[the_key] == TRIGGER)'caught a trigger
-                 Key_PreviousState[the_key] := Key_State[the_key]
-                 Key_State[the_key] := SUSTAIN  'advance to sustain
-          
-                 'start a talking cog
-                  CogQueue[the_key] := blah.go_available(the_key)
-                  'wait_this_fraction_of_a_second(1000)
+                 
+                 if blah.go_if_available(the_key)'if this one starts a voice, then advance to SUSTAIN
+                     Key_PreviousState[the_key] := Key_State[the_key]
+                     Key_State[the_key] := SUSTAIN  'advance to sustain
                  
              if (Key_State[the_key] == RELEASE)'caught a release
-                 Key_PreviousState[the_key] := Key_State[the_key]
-                 Key_State[the_key] := SILENCE  'advance to silence
-                 blah.stop_this_voice(CogQueue[the_key])
-                 'if(CogQueue[the_key] > 0)'ensure this has a cog id
-                   'Stop_One(CogQueue[the_key])
-                   'Stop_Saying_This_One(CogQueue[the_key]) 
+
+                 if blah.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
+                     Key_PreviousState[the_key] := Key_State[the_key]
+                     Key_State[the_key] := SILENCE  'advance to silence
                  
 '*****END MAIN LOOP*************************************************************************************************************         
      
