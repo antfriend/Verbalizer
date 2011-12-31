@@ -104,8 +104,8 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
                      'Key_PreviousState[the_key] := Key_State[the_key]
                  
              if (Key_State[the_key] == RELEASE)'caught a release
-                 if blah.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
-                     Key_State[the_key] := SILENCE  'advance to silence
+                    blah.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
+                    Key_State[the_key] := SILENCE  'advance to silence
                      'Key_PreviousState[the_key] := Key_State[the_key]
                      
           'Key_PreviousState[the_key] := Key_State[the_key]           
