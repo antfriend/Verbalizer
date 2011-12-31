@@ -43,7 +43,7 @@ PUB gone
 
   aa := 0
   ga := 0
-  v.go(50)'50
+  v.go(100)'50
 
 
 PUB done

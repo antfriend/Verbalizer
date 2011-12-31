@@ -66,7 +66,10 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
       initialize_pins
       'Run_LCD
       blah.start
-                                                                              
+
+      repeat the_key from 1 to 37
+        Key_State[the_key] := SILENCE
+                                                                                
 '*****MAIN LOOP*************************************************************************************************************
       repeat 'main loop
         
@@ -104,8 +107,8 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
                      'Key_PreviousState[the_key] := Key_State[the_key]
                  
              if (Key_State[the_key] == RELEASE)'caught a release
-                    blah.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
-                    Key_State[the_key] := SILENCE  'advance to silence
+                 if blah.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
+                     Key_State[the_key] := SILENCE  'advance to silence
                      'Key_PreviousState[the_key] := Key_State[the_key]
                      
           'Key_PreviousState[the_key] := Key_State[the_key]           
@@ -116,24 +119,17 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
 PRI Run_LCD
     
   if LCD.init(LCD_Line, 9600, 2)
-    waitcnt(clkfreq / 4 + cnt)'250 milliseconds (1/4 second)
+    wait_this_fraction_of_a_second(4) '250 milliseconds (1/4 second)
     clear_lcd
-'turn off the LCD
 
-    
-
-    'display_the_display
-    'send("h")
-    'send("o")
   clear_lcd
-  waitcnt(clkfreq / 4 + cnt)
+  wait_this_fraction_of_a_second(4) '250 milliseconds (1/4 second)
   display_the_display
 
 
 PRI clear_lcd
   send("?")
   send("f")
-
 
 PRI display_the_display | the_iterator
 
@@ -261,7 +257,7 @@ PRI Play_One(a_tone) | cog_id1
 
 PRI Stop_One(cog_id1)
   freq.stop(cog_id1)
- }
+
 
 PRI Say_One(a_tone) | cog_id1
 
@@ -277,4 +273,4 @@ PRI Stop_Saying_This_One(cog_id1)
   if cog_id1 > -1
     cogstop(cog_id1)
  
-               
+  }              
