@@ -11,39 +11,78 @@ PUB start
     v.start(@aa, -1, -1, -1) 'start tract, no pin outputs
     return v.sample_ptr
 
-PUB go(da_gp)  'say "blah"
+PUB ga_wrapper(the_value) | the_pitch
+    'always set gp before calling ga_wrapper
+    the_pitch := gp
+    ga := the_value
+   
+PUB go(the_key) | the_pitch  'say "blah"
     'randomize some values ********************************
     'gp := rnd(60, 120)          'random glottal pitch
-    gp := da_gp 'rnd(60, 120)
-    vp := 2 'rnd(4, 48)            'random vibrato pitch
-    vr := 92 'rnd(4, 52)            'random vibrato rate
+    the_pitch := the_key + 12 '0-23 or 12 see table in FrequencyTable.xls
+    the_pitch := the_pitch * 4
+
+    'always set gp before calling ga_wrapper 
+    gp := the_pitch 'rnd(60, 120)
+    'always set gp before calling ga_wrapper
+    
+    vp := 2 'rnd(4, 48)  
+    vr := 92 'rnd(4, 52)
 
   setformants(100, 200, 2800, 3750)
   'v.go(rnd(100, 1000))
-  v.go(1) ' 1.4 milliseconds
+  v.go(2) ' 1.4 milliseconds
   
   setformants(400, 850, 2800, 3750)
   aa := 10
-  ga := 20
-  v.go(20)
+  ga_wrapper(20)
+  v.go(40)
 
   v.go(80)
 
   setformants(730, 1050, 2500, 3480)
   aa := 20
-  ga := 30
+  ga_wrapper(30)
   na := 100       'added
   nf := 200      'added
   v.go(50)
-
-  v.go(200)'(rnd(200, 1000))
+  repeat 8
+    v.go(25)'(rnd(200, 1000))
   'gone
 
 PUB gone
-
+  {
   aa := 0
-  ga := 0
-  v.go(100)'50
+  fa := 0
+  na := 0
+  ga_wrapper(0)
+  v.go(10)
+  
+
+  setformants(730, 1050, 2500, 3480)'(400, 850, 2800, 3750)
+  ga_wrapper(20)
+  v.go(150)
+  
+  setformants(100, 200, 2800, 3750)
+  'v.go(rnd(100, 1000))
+  v.go(2) ' 1.4 milliseconds
+
+  v.go(80)
+
+  
+  aa := 0
+  'setformants(100, 100, 100, 100)
+  
+  fa := 0
+  na := 0
+  }
+  ga_wrapper(0)
+  aa := 0
+  'fa := 0
+  'na := 0
+  
+  repeat 8
+    v.go(1)'50
 
 
 PUB done

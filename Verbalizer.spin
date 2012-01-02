@@ -59,14 +59,13 @@ PRI initialize_pins
       outa[14..16]~  'set low
       dira[21..22]~~ 'set to output     
       outa[21..22]~  'set low
-             
 
 PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
 
       initialize_pins
-      'Run_LCD
       blah.start
-
+      Run_LCD
+      
       repeat the_key from 1 to 37
         Key_State[the_key] := SILENCE
                                                                                 
@@ -75,9 +74,11 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
         
         'wait_this_fraction_of_a_second(128)
         repeat Keyboard_Quadrant_Index from 1 to 33 step 8'iterate through the Keyboard_Quadrant_Index
+
           'All go low
           outa[14..16]~  'set low
           outa[21..22]~  'set low
+
           case Keyboard_Quadrant_Index
             1 : outa[15]~~  'set high
             9 : outa[14]~~  'set high
