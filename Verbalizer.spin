@@ -94,12 +94,9 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
               if(ina[Keyboard_Key_Index] == 1)
                 Update_this_Keys_State(the_key, TRUE)
                 
-                
               else
                 Update_this_Keys_State(the_key, FALSE)
-                            
 
-          
         repeat the_key from 1 to 37
              if (Key_State[the_key] == TRIGGER)'caught a trigger
                  
