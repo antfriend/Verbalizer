@@ -15,8 +15,12 @@ PUB ga_wrapper(the_value) | the_pitch
     'always set gp before calling ga_wrapper
     the_pitch := gp
     ga := the_value
-   
-PUB go(the_key) | the_pitch  'say "blah"
+
+PUB go(the_key) | the_pitch
+    go_blah(the_key)
+    'go_minimum(the_key)
+    
+PUB go_blah(the_key) | the_pitch  'say "blah"
     'randomize some values ********************************
     'gp := rnd(60, 120)          'random glottal pitch
     the_pitch := the_key + 12 '0-23 or 12 see table in FrequencyTable.xls
@@ -40,6 +44,76 @@ PUB go(the_key) | the_pitch  'say "blah"
 
   v.go(80)
 
+  setformants(730, 1050, 2500, 3480)
+  aa := 20
+  ga_wrapper(30)
+  na := 100       'added
+  nf := 200      'added
+  v.go(50)
+  repeat 8
+    v.go(1)'(rnd(200, 1000))
+  'gone
+
+PUB go_sustain(the_key)|the_pitch
+
+    'randomize some values ********************************
+    'gp := rnd(60, 120)          'random glottal pitch
+    the_pitch := the_key + 12 '0-23 or 12 see table in FrequencyTable.xls
+    the_pitch := the_pitch * 4
+
+    'always set gp before calling ga_wrapper 
+    gp := the_pitch 'rnd(60, 120)
+    'always set gp before calling ga_wrapper
+    
+    vp := 2 'rnd(4, 48)  
+    vr := 92 'rnd(4, 52)
+  {
+  setformants(100, 200, 2800, 3750)
+  'v.go(rnd(100, 1000))
+  v.go(2) ' 1.4 milliseconds
+  
+  setformants(400, 850, 2800, 3750)
+  aa := 10
+  ga_wrapper(20)
+  v.go(40)
+
+  v.go(80)
+  }
+  setformants(730, 1050, 2500, 3480)
+  aa := 20
+  ga_wrapper(30)
+  na := 100       'added
+  nf := 200      'added
+  v.go(40)
+  repeat 8
+    v.go(1)'(rnd(200, 1000))
+  'gone
+
+    
+PUB go_minimum(the_key) | the_pitch  'say "blah"
+    'randomize some values ********************************
+    'gp := rnd(60, 120)          'random glottal pitch
+    the_pitch := the_key + 12 '0-23 or 12 see table in FrequencyTable.xls
+    the_pitch := the_pitch * 4
+
+    'always set gp before calling ga_wrapper 
+    gp := the_pitch 'rnd(60, 120)
+    'always set gp before calling ga_wrapper
+    
+    vp := 2 'rnd(4, 48)  
+    vr := 92 'rnd(4, 52)
+  {
+  setformants(100, 200, 2800, 3750)
+  'v.go(rnd(100, 1000))
+  v.go(2) ' 1.4 milliseconds
+  
+  setformants(400, 850, 2800, 3750)
+  aa := 10
+  ga_wrapper(20)
+  v.go(40)
+
+  v.go(80)
+  }
   setformants(730, 1050, 2500, 3480)
   aa := 20
   ga_wrapper(30)
@@ -80,8 +154,9 @@ PUB gone
   aa := 0
   'fa := 0
   'na := 0
+  v.go(40)'50
   
-  repeat 8
+  repeat 7
     v.go(1)'50
 
 

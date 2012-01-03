@@ -13,7 +13,7 @@ CON
 '********************************************************************
      LCD_Line = 12
 '********************************************************************
-     Muh_VERSION = 3
+     Muh_VERSION = 1
 '********************************************************************
 '*** Key States ***
      'greater than 3 is the count within the debounce range 
@@ -27,7 +27,6 @@ CON
 
 VAR
      LONG Key_State[40]'each of 37 keys' Key States(TRIGGER, SUSTAIN, RELEASE, or SILENCE), but for iterating cols x rows I use 40
-     LONG Key_PreviousState[40]'What was it last time we looked?
      LONG CogQueue[QUEUEMAX],KeyQueue[QUEUEMAX]'to contain "Keys" and ", Cog IDs"
      LONG QueueCount
       
@@ -64,9 +63,9 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
 
       initialize_pins
       blah.start
-      Run_LCD
+      'Run_LCD
       
-      repeat the_key from 1 to 37
+      repeat the_key from 0 to 38
         Key_State[the_key] := SILENCE
                                                                                 
 '*****MAIN LOOP*************************************************************************************************************
@@ -97,20 +96,21 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
               else
                 Update_this_Keys_State(the_key, FALSE)
 
+
         repeat the_key from 1 to 37
-             if (Key_State[the_key] == TRIGGER)'caught a trigger
-                 
+             if (Key_State[the_key] == SUSTAIN)
+                blah.go_sustain(the_key)
+                
+             if (Key_State[the_key] == TRIGGER)'caught a trigger                 
                  if blah.go_if_available(the_key)'if this one starts a voice, then advance to SUSTAIN
                      Key_State[the_key] := SUSTAIN  'advance to sustain
-                     'Key_PreviousState[the_key] := Key_State[the_key]
                  
              if (Key_State[the_key] == RELEASE)'caught a release
                  if blah.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
                      Key_State[the_key] := SILENCE  'advance to silence
-                     'Key_PreviousState[the_key] := Key_State[the_key]
-                     
-          'Key_PreviousState[the_key] := Key_State[the_key]           
-                 
+                              
+
+
 '*****END MAIN LOOP*************************************************************************************************************         
      
    
