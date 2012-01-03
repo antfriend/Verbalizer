@@ -1,8 +1,9 @@
-'Blah
+'a voice
 
 VAR
         'vocal tract paramters
         byte aa,ga,gp,vp,vr,f1,f2,f3,f4,na,nf,fa,ff
+        
 OBJ
         v       : "VocalTract"
 
@@ -53,7 +54,8 @@ PUB go_blah(the_key) | the_pitch  'say "blah"
   na := 100       'added
   nf := 200      'added
   v.go(50)
-  repeat 8
+  
+  repeat 2 'fill the buffer
     v.go(1)'(rnd(200, 1000))
   'gone
 
@@ -88,7 +90,7 @@ PUB go_sustain(the_key)|the_pitch
   na := 100       'added
   nf := 200      'added
   v.go(40)
-  repeat 8
+  repeat 6 'fill the buffer
     v.go(1)'(rnd(200, 1000))
   'gone
 
@@ -123,7 +125,7 @@ PUB go_minimum(the_key) | the_pitch  'say "blah"
   na := 100       'added
   nf := 200      'added
   v.go(50)
-  repeat 8
+  repeat 6
     v.go(25)'(rnd(200, 1000))
   'gone
 
@@ -159,7 +161,7 @@ PUB gone
   na := 0
   v.go(40)'50
   
-  repeat 7
+  repeat 6
     v.go(1)'50
 
 

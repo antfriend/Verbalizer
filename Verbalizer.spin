@@ -98,6 +98,10 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
               else
                 Update_this_Keys_State(the_key, FALSE)
 
+        repeat the_key from 1 to 37         
+             if (Key_State[the_key] == RELEASE)'caught a release
+                 if blah.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
+                     Key_State[the_key] := SILENCE  'advance to silence
 
         repeat the_key from 1 to 37
              if (Key_State[the_key] == SUSTAIN)
@@ -108,11 +112,6 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
                  if blah.go_if_available(the_key)'if this one starts a voice, then advance to SUSTAIN
                      Key_State[the_key] := SUSTAIN  'advance to sustain
                      
-        repeat the_key from 1 to 37         
-             if (Key_State[the_key] == RELEASE)'caught a release
-                 if blah.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
-                     Key_State[the_key] := SILENCE  'advance to silence
-                              
 
 
 '*****END MAIN LOOP*************************************************************************************************************         
