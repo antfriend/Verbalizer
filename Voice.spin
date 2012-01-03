@@ -22,6 +22,9 @@ PUB go(the_key) | the_pitch
     
 PUB go_blah(the_key) | the_pitch  'say "blah"
     'randomize some values ********************************
+
+    setformants(400, 850, 2800, 3750)
+    v.go(1)
     'gp := rnd(60, 120)          'random glottal pitch
     the_pitch := the_key + 12 '0-23 or 12 see table in FrequencyTable.xls
     the_pitch := the_pitch * 4
@@ -32,10 +35,10 @@ PUB go_blah(the_key) | the_pitch  'say "blah"
     
     vp := 2 'rnd(4, 48)  
     vr := 92 'rnd(4, 52)
-
+  'v.go(100)
   setformants(100, 200, 2800, 3750)
   'v.go(rnd(100, 1000))
-  v.go(2) ' 1.4 milliseconds
+  v.go(50) ' 1.4 milliseconds
   
   setformants(400, 850, 2800, 3750)
   aa := 10
@@ -152,8 +155,8 @@ PUB gone
   }
   ga_wrapper(0)
   aa := 0
-  'fa := 0
-  'na := 0
+  fa := 0
+  na := 0
   v.go(40)'50
   
   repeat 7

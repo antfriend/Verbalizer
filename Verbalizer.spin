@@ -42,6 +42,8 @@ PRI Update_this_Keys_State(the_key, is_pressed) | the_count_now
   else
     if (Key_State[the_key] == SUSTAIN)
        Key_State[the_key] := RELEASE
+    else
+       Key_State[the_key] := SILENCE 
 
 PRI wait_this_fraction_of_a_second(the_decimal)'1/the_decimal, e.g. 1/2, 1/4th, 1/10
 
@@ -101,10 +103,12 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
              if (Key_State[the_key] == SUSTAIN)
                 blah.go_sustain(the_key)
                 
+        repeat the_key from 1 to 37       
              if (Key_State[the_key] == TRIGGER)'caught a trigger                 
                  if blah.go_if_available(the_key)'if this one starts a voice, then advance to SUSTAIN
                      Key_State[the_key] := SUSTAIN  'advance to sustain
-                 
+                     
+        repeat the_key from 1 to 37         
              if (Key_State[the_key] == RELEASE)'caught a release
                  if blah.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
                      Key_State[the_key] := SILENCE  'advance to silence
