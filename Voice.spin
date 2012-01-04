@@ -15,7 +15,13 @@ PUB start
 PUB ga_wrapper(the_value) | the_pitch
     'always set gp before calling ga_wrapper
     the_pitch := gp
-    ga := the_value
+    the_pitch := the_pitch / 4
+    the_pitch := the_pitch - 12
+    the_pitch := the_pitch / 2
+    if (the_value > the_pitch)
+      ga := the_value - the_pitch
+    else
+      ga := the_value
 
 PUB go(the_key) | the_pitch
     go_blah(the_key)
