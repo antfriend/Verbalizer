@@ -13,7 +13,7 @@ CON
 '********************************************************************
      LCD_Line = 12
 '********************************************************************
-     Muh_VERSION = 1
+     Muh_VERSION = 4
 '********************************************************************
 '*** Key States ***
      'greater than 3 is the count within the debounce range 
@@ -29,6 +29,8 @@ VAR
      LONG Key_State[40]'each of 37 keys' Key States(TRIGGER, SUSTAIN, RELEASE, or SILENCE), but for iterating cols x rows I use 40
      LONG CogQueue[QUEUEMAX],KeyQueue[QUEUEMAX]'to contain "Keys" and ", Cog IDs"
      LONG QueueCount
+     BYTE LCD_Display_Mode
+     LONG LCD_Stack[500]
       
 OBJ
         LCD        :               "Serial_Lcd"
@@ -63,8 +65,10 @@ PRI initialize_pins
 
 PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
 
+      LCD_Display_Mode := 0
       initialize_pins
       blah.start
+      cognew(LCD_Display_Loop, @LCD_Stack)
       'Run_LCD
       
       repeat the_key from 0 to 38
@@ -125,7 +129,7 @@ PRI Run_LCD
 
   clear_lcd
   wait_this_fraction_of_a_second(4) '250 milliseconds (1/4 second)
-  display_the_display
+  'display_the_display
 
 
 PRI clear_lcd
@@ -225,6 +229,18 @@ PRI char_from_number(number_value) : char_val
       32..100 : char_val := "W"  
     return char_val
 
+PRI LCD_Display_Loop
+
+  Run_LCD
+  
+  repeat
+    case LCD_Display_Mode
+      0 :  display_the_display
+      1 :  display_the_display
+      other :  display_the_display
+
+    wait_this_fraction_of_a_second(1)
+    
 
 {********************************************************************************************
            FREQOUTMULTI

@@ -76,8 +76,8 @@ PUB go_sustain(the_key)|the_pitch
     gp := the_pitch 'rnd(60, 120)
     'always set gp before calling ga_wrapper
     
-    vp := 2 'rnd(4, 48)  
-    vr := 92 'rnd(4, 52)
+    vp := 20 'rnd(4, 48)  
+    vr := 20 'rnd(4, 52)
   {
   setformants(100, 200, 2800, 3750)
   'v.go(rnd(100, 1000))
@@ -91,10 +91,10 @@ PUB go_sustain(the_key)|the_pitch
   v.go(80)
   }
   setformants(730, 1050, 2500, 3480)
-  aa := 20
+  aa := 2
   ga_wrapper(30)
-  na := 100       'added
-  nf := 200      'added
+  na := 20       'added
+  nf := 60      'added
   v.go(40)
   repeat 6 'fill the buffer
     v.go(1)'(rnd(200, 1000))
