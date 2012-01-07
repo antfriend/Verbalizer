@@ -13,6 +13,9 @@ CON
 '********************************************************************
      LCD_Line = 12
 '********************************************************************
+     Mode_Pot = 23
+     Var_Pot = 13
+'********************************************************************
      Muh_VERSION = 4
 '********************************************************************
 '*** Key States ***
@@ -34,7 +37,7 @@ VAR
       
 OBJ
         LCD        :               "Serial_Lcd"
-        blah       :               "VerbalizeIt"
+        Verbalizations       :               "VerbalizeIt"
    
 PRI Update_this_Keys_State(the_key, is_pressed) | the_count_now
 
@@ -67,7 +70,7 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
 
       LCD_Display_Mode := 0
       initialize_pins
-      blah.start
+      Verbalizations.start
       cognew(LCD_Display_Loop, @LCD_Stack)
       'Run_LCD
       
@@ -104,16 +107,16 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
 
         repeat the_key from 1 to 37         
              if (Key_State[the_key] == RELEASE)'caught a release
-                 if blah.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
+                 if Verbalizations.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
                      Key_State[the_key] := SILENCE  'advance to silence
 
         repeat the_key from 1 to 37
              if (Key_State[the_key] == SUSTAIN)
-                blah.go_sustain(the_key)
+                Verbalizations.go_sustain(the_key)
                 
         repeat the_key from 1 to 37       
              if (Key_State[the_key] == TRIGGER)'caught a trigger                 
-                 if blah.go_if_available(the_key)'if this one starts a voice, then advance to SUSTAIN
+                 if Verbalizations.go_if_available(the_key)'if this one starts a voice, then advance to SUSTAIN
                      Key_State[the_key] := SUSTAIN  'advance to sustain
                      
 
@@ -169,8 +172,7 @@ PRI display_the_display | the_iterator
   wait_this_fraction_of_a_second(4)
     
   LCD_home_then_here(0)
-  LCD.str(string("v="))
-  send(char_from_number(Muh_VERSION))
+  
   repeat the_iterator from 72 to 4 step 2 '32 segments 
     send("*")
     wait_this_fraction_of_a_second(the_iterator)
@@ -234,13 +236,72 @@ PRI LCD_Display_Loop
   Run_LCD
   
   repeat
+    LCD_Display_Mode := Decimal_value_of_pot(get_this_pot_value(Mode_Pot))
     case LCD_Display_Mode
       0 :  display_the_display
       1 :  display_the_display
-      other :  display_the_display
+      other :  display_the_pots
 
-    wait_this_fraction_of_a_second(1)
+    'wait_this_fraction_of_a_second(1)
+
+PRI display_the_pots
+  repeat 2
+    LCD.str(string(" m="))
+    send(char_from_number(Decimal_value_of_pot(get_this_pot_value(Mode_Pot))))
+    wait_this_fraction_of_a_second(50)
+    LCD.str(string(" v="))
+    send(char_from_number(Decimal_value_of_pot(get_this_pot_value(Var_Pot))))
+    wait_this_fraction_of_a_second(50)
     
+PRI get_this_pot_value(the_pot) | Pot_Line, Value_Total, Repeat_Value, Start_Count, End_Count, The_Delay
+  Pot_Line:= the_pot
+  Value_Total := 0
+  Repeat_Value:=1 'number of iterations to average
+
+
+    repeat Repeat_Value
+      
+      dira[the_pot]~~
+      outa[the_pot]~~
+      waitcnt(1_000+cnt)'wait for the cap to charge.
+                        '1_000 to 20_000+cnt makes a range from 1 to 650
+                        'with about the first 1/8 of the range as dead space
+      'outa[Pot_Line]~
+      dira[Pot_Line]~
+      
+      Start_Count:=cnt
+      End_Count:=cnt  'this line must be here because the following line doesn't execute at the lowest potentiometer settings
+                                'leaving the value of End_Count at zero or null or something
+                                'a bigger capacitor (current is 0.1 uf) might discharge more slowly at the low end of the ohms from the pot
+                                'but probably not.  I think big and small capacitors may discharge at the same rate for, like 0 to 10 ohms, not sure
+            
+      repeat while ina[the_pot]~~
+          End_Count := cnt
+          
+      The_Delay := End_Count - Start_Count
+      Value_Total := The_Delay + Value_Total
+      
+  Value_Total := Value_Total / Repeat_Value
+  Value_Total := Value_Total / 100
+
+  return Value_Total
+
+PRI Decimal_value_of_pot(pot_value) : the_decimal_value
+
+           case pot_value
+                0..3   :   the_decimal_value := 1 'necesary first threshhold
+                4..15   :   the_decimal_value := 2
+                16..35   :   the_decimal_value := 3
+                36..70   :   the_decimal_value := 4
+                71..125   :   the_decimal_value := 5
+                126..205   :   the_decimal_value := 6
+                206..310   :   the_decimal_value := 7
+                311..460   :   the_decimal_value := 8
+                461..630   :   the_decimal_value := 9
+                other   :   the_decimal_value := 10
+                
+    return the_decimal_value        
+
 
 {********************************************************************************************
            FREQOUTMULTI
@@ -279,14 +340,14 @@ PRI Stop_One(cog_id1)
 PRI Say_One(a_tone) | cog_id1
 
   'cog_id1 := freq.start(10, 11, -1, -1, -1, -1, a_tone, 0, 0, 0, 0, 0)
-  cog_id1 := blah.start'(a_tone)
-  'blah.go
+  cog_id1 := Verbalizations.start'(a_tone)
+  'Verbalizations.go
   RETURN cog_id1
   
 
 PRI Stop_Saying_This_One(cog_id1)
   'freq.stop(cog_id1)
-  'blah.done
+  'Verbalizations.done
   if cog_id1 > -1
     cogstop(cog_id1)
  
