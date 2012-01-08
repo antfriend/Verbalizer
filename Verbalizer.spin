@@ -129,9 +129,28 @@ PRI Run_LCD
   if LCD.init(LCD_Line, 9600, 2)
     wait_this_fraction_of_a_second(4) '250 milliseconds (1/4 second)
     clear_lcd
-
-  clear_lcd
-  wait_this_fraction_of_a_second(4) '250 milliseconds (1/4 second)
+    'see LCD commands at:
+    'http://cdn.shopify.com/s/files/1/0038/9582/files/LCD117_Board_Command_Summary.pdf?1260768875
+    'source:
+    'http://shop.moderndevice.com/products/16-x-2-gray-lcd-and-lcd117-kit
+    
+    'LCD.str(string("?G18")) "?>4"
+    'send("?")
+    'send("<")
+    'send("4")
+    'send("1")
+    'send("6")
+    'wait_this_fraction_of_a_second(2)
+    'LCD.str(string("?B88"))
+    '$B00 to $Bff
+    'send("?")
+    'send("B")
+    'send("8")
+    'send("8") 
+    'wait_this_fraction_of_a_second(2)
+        
+  'clear_lcd
+  'wait_this_fraction_of_a_second(4) '250 milliseconds (1/4 second)
   'display_the_display
 
 
