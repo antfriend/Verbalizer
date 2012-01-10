@@ -27,13 +27,18 @@ CON
      SILENCE = 0
 '********************************************************************
      QUEUEMAX = 4
-
+     buffer_size = $50
+     
 VAR
      LONG Key_State[40]'each of 37 keys' Key States(TRIGGER, SUSTAIN, RELEASE, or SILENCE), but for iterating cols x rows I use 40
      LONG CogQueue[QUEUEMAX],KeyQueue[QUEUEMAX]'to contain "Keys" and ", Cog IDs"
      LONG QueueCount
      BYTE LCD_Display_Mode
      LONG LCD_Stack[500]
+     LONG var_vp 'this really should be a BYTE
+     LONG var_vr 'this really should be a BYTE
+     BYTE Pots[2]
+     long buffer[buffer_size]
       
 OBJ
         LCD        :               "Serial_Lcd"
@@ -70,7 +75,7 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
 
       LCD_Display_Mode := 0
       initialize_pins
-      Verbalizations.start
+      Verbalizations.start(@Pots)
       cognew(LCD_Display_Loop, @LCD_Stack)
       'Run_LCD
       
@@ -264,12 +269,18 @@ PRI LCD_Display_Loop
     'wait_this_fraction_of_a_second(1)
 
 PRI display_the_pots
-  repeat 2
-    LCD.str(string(" m="))
-    send(char_from_number(Decimal_value_of_pot(get_this_pot_value(Mode_Pot))))
+  LCD_home_then_here(0)
+  'repeat 2
+    LCD.str(string(" vp="))
+    var_vp := get_this_pot_value(Mode_Pot)
+    send(char_from_number(Decimal_value_of_pot(var_vp)))
+    Pots[0] := Decimal_value_of_pot(var_vp)
     wait_this_fraction_of_a_second(50)
-    LCD.str(string(" v="))
-    send(char_from_number(Decimal_value_of_pot(get_this_pot_value(Var_Pot))))
+    
+    LCD.str(string(" vr="))
+    var_vr := get_this_pot_value(Var_Pot)
+    send(char_from_number(Decimal_value_of_pot(var_vr)))
+    Pots[1] := Decimal_value_of_pot(var_vr)
     wait_this_fraction_of_a_second(50)
     
 PRI get_this_pot_value(the_pot) | Pot_Line, Value_Total, Repeat_Value, Start_Count, End_Count, The_Delay
