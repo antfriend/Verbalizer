@@ -23,10 +23,11 @@ OBJ
 
 PRI Initialize
   adc.Start(CLK_PIN, IO_CLOCK, ADDRESS, DATA_PIN, CS_PIN)
+  'initialize LEDs on Demo board
   DIRA[16..23]~~
   OUTA[16..23]~
 
-  repeat 10
+  repeat 3
     wait_this_fraction_of_a_second(10)
     OUTA[16..23]~~
     wait_this_fraction_of_a_second(10)
@@ -38,10 +39,19 @@ PUB MAIN
 
   repeat
     the_results := adc.READ(Analog_In_Line)
+    wait_this_fraction_of_a_second(10)
     LEDs_Off
+    wait_this_fraction_of_a_second(10)
     case the_results
       0..10 : OUTA[16]~~
-      10..255 : OUTA[17]~~
+      10..19 : OUTA[17]~~
+      20..29 : OUTA[18]~~
+      30..39 : OUTA[19]~~
+      40..49 : OUTA[20]~~
+      50..59 : OUTA[21]~~
+      60..69 : OUTA[22]~~
+      70..79 : OUTA[23]~~
+      
       other : OUTA[16..23]~~
 
 PRI LEDs_Off
