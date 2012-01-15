@@ -258,16 +258,24 @@ PRI char_from_number(number_value) : char_val
 PRI LCD_Display_Loop
 
   Run_LCD
-  
+  display_the_pots
+  display_the_display
+  display_the_display
+
+  repeat
+    display_the_pots
+    
+  {
   repeat
     LCD_Display_Mode := Decimal_value_of_pot(get_this_pot_value(Mode_Pot))
     case LCD_Display_Mode
-      0 :  display_the_display
+      100 :  display_the_display
       1 :  display_the_display
       other :  display_the_pots
 
     'wait_this_fraction_of_a_second(1)
-
+  }
+  
 PRI display_the_pots
   LCD_home_then_here(0)
   'repeat 2
