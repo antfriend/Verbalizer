@@ -9,14 +9,13 @@
   This would require the calling software to always retcieve the
   previous for each new address.  I felt that would make this driver
   confusing to use so I implemented it at 50% efficiency.
-  
+  See TLC545C_Driver_Test.spin for pin assignment and test code.
 ***************************************************************
 includes code adapted from:
  ADC0831_Driver.spin    
    Copyright (c) 2009 Austin Bowen
    *See end of file for terms of use*
 ***************************************************************
-
 
 
 }}                      
