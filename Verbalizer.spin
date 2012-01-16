@@ -32,7 +32,13 @@ CON
 '********************************************************************
      QUEUEMAX = 4
      buffer_size = $50
-     
+'*** adc **************
+  CLK_PIN = 0
+  IO_CLOCK = 1
+  ADDRESS = 2
+  DATA_PIN = 3
+  CS_PIN = 4
+    
 VAR
      LONG Key_State[40]'each of 37 keys' Key States(TRIGGER, SUSTAIN, RELEASE, or SILENCE), but for iterating cols x rows I use 40
      LONG CogQueue[QUEUEMAX],KeyQueue[QUEUEMAX]'to contain "Keys" and ", Cog IDs"
@@ -47,7 +53,8 @@ VAR
 OBJ
         LCD        :               "Serial_Lcd"
         Verbalizations       :               "VerbalizeIt"
-   
+        adc   :     "TLC545C"
+        
 PRI Update_this_Keys_State(the_key, is_pressed) | the_count_now
 
   if (is_pressed == TRUE)
@@ -80,6 +87,7 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
       LCD_Display_Mode := 0
       initialize_pins
       Verbalizations.start(@Pots)
+      adc.Start(CLK_PIN, IO_CLOCK, ADDRESS, DATA_PIN, CS_PIN)
       cognew(LCD_Display_Loop, @LCD_Stack)
       'Run_LCD
       

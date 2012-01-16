@@ -21,7 +21,7 @@ includes code adapted from:
 }}                      
 CON
   wait_time = 400'in clock cycles'390 or greater works
-  
+    
 VAR
   LONG CLK, IO_CLOCK, ADDRESS, DATA, CS
 
