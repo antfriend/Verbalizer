@@ -15,29 +15,29 @@ CON
      _CLKMODE = XTAL1 + PLL16X
      _XINFREQ = 5_000_000
 '********************************************************************
-     LCD_Line = 12
+        LCD_Line = 12
 '********************************************************************
-     Mode_Pot = 23
-     Var_Pot = 13
+     'Mode_Pot = 23
+     'Var_Pot = 13
 '********************************************************************
      Muh_VERSION = 4
 '********************************************************************
 '*** Key States ***
      'greater than 3 is the count within the debounce range 
-     DEBOUNCE= 100_000
-     TRIGGER = 3
-     SUSTAIN = 2
-     RELEASE = 1
-     SILENCE = 0
+        DEBOUNCE= 100_000
+        TRIGGER = 3
+        SUSTAIN = 2
+        RELEASE = 1
+        SILENCE = 0
 '********************************************************************
-     QUEUEMAX = 4
-     buffer_size = $50
+        QUEUEMAX = 4
+        buffer_size = $50
 '*** adc **************
-  CLK_PIN = 0
-  IO_CLOCK = 1
-  ADDRESS = 2
-  DATA_PIN = 3
-  CS_PIN = 4
+        CLK_PIN = 13
+        IO_CLOCK = 23
+        ADDRESS = 24
+        DATA_PIN = 25
+        CS_PIN = 26
     
 VAR
      LONG Key_State[40]'each of 37 keys' Key States(TRIGGER, SUSTAIN, RELEASE, or SILENCE), but for iterating cols x rows I use 40
@@ -51,9 +51,9 @@ VAR
      long buffer[buffer_size]
       
 OBJ
-        LCD        :               "Serial_Lcd"
-        Verbalizations       :               "VerbalizeIt"
-        adc   :     "TLC545C"
+        LCD              :   "Serial_Lcd"
+        Verbalizations   :   "VerbalizeIt"
+        adc              :   "TLC545C"
         
 PRI Update_this_Keys_State(the_key, is_pressed) | the_count_now
 
@@ -292,14 +292,18 @@ PRI display_the_pots
   LCD_home_then_here(0)
   'repeat 2
     LCD.str(string(" vp="))
-    var_vp := get_this_pot_value(Mode_Pot)
-    send(char_from_number(Decimal_value_of_pot(var_vp)))
+    'var_vp := get_this_pot_value(Mode_Pot)
+    var_vp  := 4
+    var_vp  := adc.Read(1)
+    
+    send(char_from_number(var_vp))
     Pots[0] := Decimal_value_of_pot(var_vp)
     wait_this_fraction_of_a_second(50)
     
     LCD.str(string(" vr="))
-    var_vr := get_this_pot_value(Var_Pot)
-    send(char_from_number(Decimal_value_of_pot(var_vr)))
+    'var_vr := get_this_pot_value(Var_Pot)
+    var_vr  := adc.Read(18)
+    send(char_from_number(var_vr))
     Pots[1] := Decimal_value_of_pot(var_vr)
     wait_this_fraction_of_a_second(50)
     
