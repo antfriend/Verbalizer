@@ -20,7 +20,7 @@ CON
      'Mode_Pot = 23
      'Var_Pot = 13
 '********************************************************************
-     Muh_VERSION = 4
+     Muh_VERSION = 5
 '********************************************************************
 '*** Key States ***
      'greater than 3 is the count within the debounce range 
@@ -45,9 +45,11 @@ VAR
      LONG QueueCount
      BYTE LCD_Display_Mode
      LONG LCD_Stack[500]
+     LONG Verbalizer_Stack[500]
+     LONG ADC_Stack[500]
      LONG var_vp 'this really should be a BYTE
-     LONG var_vr 'this really should be a BYTE
-     BYTE Pots[2]
+     LONG var_vr 'this really should be a BYTE    
+     BYTE Pot[2]
      long buffer[buffer_size]
       
 OBJ
@@ -86,8 +88,8 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
 
       LCD_Display_Mode := 0
       initialize_pins
-      Verbalizations.start(@Pots)
-      adc.Start(CLK_PIN, IO_CLOCK, ADDRESS, DATA_PIN, CS_PIN)
+      Verbalizations.start(@Verbalizer_Stack)    
+      cognew(Analog_to_Digital_Conversion, @ADC_Stack)
       cognew(LCD_Display_Loop, @LCD_Stack)
       'Run_LCD
       
@@ -272,7 +274,7 @@ PRI LCD_Display_Loop
   Run_LCD
   display_the_pots
   display_the_display
-  display_the_display
+  'display_the_display
 
   repeat
     display_the_pots
@@ -292,19 +294,19 @@ PRI display_the_pots
   LCD_home_then_here(0)
   'repeat 2
     LCD.str(string(" vp="))
-    'var_vp := get_this_pot_value(Mode_Pot)
-    var_vp  := 4
-    var_vp  := adc.Read(1)
+    'var_vp := get_this_pot_value(27)
+    'var_vp++'  := 4
+    var_vp  := Pot[0]' adc.Read(0)
     
-    send(char_from_number(var_vp))
-    Pots[0] := Decimal_value_of_pot(var_vp)
+    send(char_from_number(Decimal_value_of_pot(var_vp)))
+    'Pot[0] := Decimal_value_of_pot(var_vp)
     wait_this_fraction_of_a_second(50)
     
     LCD.str(string(" vr="))
     'var_vr := get_this_pot_value(Var_Pot)
-    var_vr  := adc.Read(18)
-    send(char_from_number(var_vr))
-    Pots[1] := Decimal_value_of_pot(var_vr)
+    var_vr  := Pot[0]
+    send(char_from_number(Decimal_value_of_pot(var_vr)))
+    'Pot[1] := Decimal_value_of_pot(var_vr)
     wait_this_fraction_of_a_second(50)
     
 PRI get_this_pot_value(the_pot) | Pot_Line, Value_Total, Repeat_Value, Start_Count, End_Count, The_Delay
@@ -356,7 +358,17 @@ PRI Decimal_value_of_pot(pot_value) : the_decimal_value
                 
     return the_decimal_value        
 
+PRI Analog_to_Digital_Conversion
 
+  Pot[0] := 0
+  Pot[1] := 1
+  adc.Start(CLK_PIN, IO_CLOCK, ADDRESS, DATA_PIN, CS_PIN)
+  wait_this_fraction_of_a_second(10)
+  
+  repeat
+    Pot[0] := adc.Read(0)
+    wait_this_fraction_of_a_second(1000)
+  
 {********************************************************************************************
            FREQOUTMULTI
 ********************************************************************************************}
