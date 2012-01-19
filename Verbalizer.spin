@@ -46,10 +46,8 @@ VAR
      BYTE LCD_Display_Mode
      LONG LCD_Stack[500]
      LONG Verbalizer_Stack[500]
-     LONG ADC_Stack[500]
-     LONG var_vp 'this really should be a BYTE
-     LONG var_vr 'this really should be a BYTE    
-     BYTE Pot[2]
+     LONG ADC_Stack[500]    
+     BYTE Pot[19]
      long buffer[buffer_size]
       
 OBJ
@@ -146,32 +144,25 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
 PRI Run_LCD
     
   if LCD.init(LCD_Line, 9600, 2)
-    wait_this_fraction_of_a_second(4) '250 milliseconds (1/4 second)
-    clear_lcd
+    wait_this_fraction_of_a_second(2) '250 milliseconds (1/4 second)
+    'clear_lcd
     'see LCD commands at:
     'http://cdn.shopify.com/s/files/1/0038/9582/files/LCD117_Board_Command_Summary.pdf?1260768875
     'source:
     'http://shop.moderndevice.com/products/16-x-2-gray-lcd-and-lcd117-kit
-    
-    'LCD.str(string("?G18")) "?>4"
-    'send("?")
-    'send("<")
-    'send("4")
-    'send("1")
-    'send("6")
-    'wait_this_fraction_of_a_second(2)
-    'LCD.str(string("?B88"))
-    '$B00 to $Bff
-    'send("?")
-    'send("B")
-    'send("8")
-    'send("8") 
-    'wait_this_fraction_of_a_second(2)
-        
-  'clear_lcd
-  'wait_this_fraction_of_a_second(4) '250 milliseconds (1/4 second)
-  'display_the_display
 
+    'LCD datasheet: http://cdn.shopify.com/s/files/1/0038/9582/files/MD_Blue16x2LCD_1602A.pdf?1260730783
+    
+    'LCD.str(string("?G216")) 'configure driver for 2 x 16 LCD
+    'LCD.str(string("?>3"))'enter big number mode
+    'LCD.str(string("?<"))'exit big number mode
+    'LCD.str(string("?Bff"))'Backlight Intensity 
+     'LCD.str(string("?L4"))'Low output on auxiliary digital pins 4[4,5,6]
+     'LCD.str(string("?L5"))'Low output on auxiliary digital pins 5[4,5,6]
+     'LCD.str(string("?L6"))'Low output on auxiliary digital pins 6[4,5,6]
+     'LCD.str(string("?c0"))'Set Cursor Style: 0= none 2= blinking 3=underline
+     'LCD.str(string("?!01"))'Send direct command to LCD of "01"
+     'wait_this_fraction_of_a_second(2)
 
 PRI clear_lcd
   send("?")
@@ -272,75 +263,22 @@ PRI char_from_number(number_value) : char_val
 PRI LCD_Display_Loop
 
   Run_LCD
-  display_the_pots
+  'display_the_pots
   display_the_display
-  'display_the_display
+  display_the_display
 
   repeat
     display_the_pots
-    
-  {
-  repeat
-    LCD_Display_Mode := Decimal_value_of_pot(get_this_pot_value(Mode_Pot))
-    case LCD_Display_Mode
-      100 :  display_the_display
-      1 :  display_the_display
-      other :  display_the_pots
 
-    'wait_this_fraction_of_a_second(1)
-  }
   
-PRI display_the_pots
-  LCD_home_then_here(0)
-  'repeat 2
-    LCD.str(string(" vp="))
-    'var_vp := get_this_pot_value(27)
-    'var_vp++'  := 4
-    var_vp  := Pot[0]' adc.Read(0)
-    
-    send(char_from_number(Decimal_value_of_pot(var_vp)))
-    'Pot[0] := Decimal_value_of_pot(var_vp)
-    wait_this_fraction_of_a_second(50)
-    
-    LCD.str(string(" vr="))
-    'var_vr := get_this_pot_value(Var_Pot)
-    var_vr  := Pot[0]
-    send(char_from_number(Decimal_value_of_pot(var_vr)))
-    'Pot[1] := Decimal_value_of_pot(var_vr)
-    wait_this_fraction_of_a_second(50)
-    
-PRI get_this_pot_value(the_pot) | Pot_Line, Value_Total, Repeat_Value, Start_Count, End_Count, The_Delay
-  Pot_Line:= the_pot
-  Value_Total := 0
-  Repeat_Value:=1 'number of iterations to average
-
-
-    repeat Repeat_Value
-      
-      dira[the_pot]~~
-      outa[the_pot]~~
-      waitcnt(1_000+cnt)'wait for the cap to charge.
-                        '1_000 to 20_000+cnt makes a range from 1 to 650
-                        'with about the first 1/8 of the range as dead space
-      'outa[Pot_Line]~
-      dira[Pot_Line]~
-      
-      Start_Count:=cnt
-      End_Count:=cnt  'this line must be here because the following line doesn't execute at the lowest potentiometer settings
-                                'leaving the value of End_Count at zero or null or something
-                                'a bigger capacitor (current is 0.1 uf) might discharge more slowly at the low end of the ohms from the pot
-                                'but probably not.  I think big and small capacitors may discharge at the same rate for, like 0 to 10 ohms, not sure
-            
-      repeat while ina[the_pot]~~
-          End_Count := cnt
-          
-      The_Delay := End_Count - Start_Count
-      Value_Total := The_Delay + Value_Total
-      
-  Value_Total := Value_Total / Repeat_Value
-  Value_Total := Value_Total / 100
-
-  return Value_Total
+PRI display_the_pots | index
+    LCD_home_then_here(0)
+    'LCD.str(string(" p1="))
+    repeat index from 0 to 11
+    'LCD.str(string(" p0="))
+      send(char_from_number(Decimal_value_of_pot(Pot[index])))
+   
+    wait_this_fraction_of_a_second(10)
 
 PRI Decimal_value_of_pot(pot_value) : the_decimal_value
 
@@ -358,15 +296,14 @@ PRI Decimal_value_of_pot(pot_value) : the_decimal_value
                 
     return the_decimal_value        
 
-PRI Analog_to_Digital_Conversion
+PRI Analog_to_Digital_Conversion | index
 
-  Pot[0] := 0
-  Pot[1] := 1
   adc.Start(CLK_PIN, IO_CLOCK, ADDRESS, DATA_PIN, CS_PIN)
   wait_this_fraction_of_a_second(10)
   
   repeat
-    Pot[0] := adc.Read(0)
+    repeat index from 0 to 11
+      Pot[index] := adc.Read(index)
     wait_this_fraction_of_a_second(1000)
   
 {********************************************************************************************
