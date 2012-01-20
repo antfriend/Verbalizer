@@ -17,22 +17,16 @@ CON
 '********************************************************************
         LCD_Line = 12
 '********************************************************************
-     'Mode_Pot = 23
-     'Var_Pot = 13
-'********************************************************************
      Muh_VERSION = 5
 '********************************************************************
 '*** Key States ***
      'greater than 3 is the count within the debounce range 
-        DEBOUNCE= 100_000
+        'DEBOUNCE= 100_000
         TRIGGER = 3
         SUSTAIN = 2
         RELEASE = 1
         SILENCE = 0
-'********************************************************************
-        QUEUEMAX = 4
-        buffer_size = $50
-'*** adc **************
+'*** adc ********************************************************
         CLK_PIN = 13
         IO_CLOCK = 23
         ADDRESS = 24
@@ -41,14 +35,12 @@ CON
     
 VAR
      LONG Key_State[40]'each of 37 keys' Key States(TRIGGER, SUSTAIN, RELEASE, or SILENCE), but for iterating cols x rows I use 40
-     LONG CogQueue[QUEUEMAX],KeyQueue[QUEUEMAX]'to contain "Keys" and ", Cog IDs"
      LONG QueueCount
      BYTE LCD_Display_Mode
      LONG LCD_Stack[500]
-     LONG Verbalizer_Stack[500]
+     'LONG Verbalizer_Stack[500]
      LONG ADC_Stack[500]    
      BYTE Pot[19]
-     long buffer[buffer_size]
       
 OBJ
         LCD              :   "Serial_Lcd"
@@ -86,7 +78,7 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
 
       LCD_Display_Mode := 0
       initialize_pins
-      Verbalizations.start(@Verbalizer_Stack)    
+      Verbalizations.start(@Pot)    
       cognew(Analog_to_Digital_Conversion, @ADC_Stack)
       cognew(LCD_Display_Loop, @LCD_Stack)
       'Run_LCD
@@ -282,6 +274,8 @@ PRI display_the_pots | index
 
 PRI Decimal_value_of_pot(pot_value) : the_decimal_value
 
+  return pot_value /25
+{  
            case pot_value
                 0..3   :   the_decimal_value := 1 'necesary first threshhold
                 4..15   :   the_decimal_value := 2
@@ -295,9 +289,12 @@ PRI Decimal_value_of_pot(pot_value) : the_decimal_value
                 other   :   the_decimal_value := 10
                 
     return the_decimal_value        
-
+}
 PRI Analog_to_Digital_Conversion | index
 
+  repeat index from 0 to 18
+    Pot[index] := 0
+    
   adc.Start(CLK_PIN, IO_CLOCK, ADDRESS, DATA_PIN, CS_PIN)
   wait_this_fraction_of_a_second(10)
   
