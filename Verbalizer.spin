@@ -217,7 +217,7 @@ PRI hop_cursor(the_number_to_hop)
 PRI char_from_number(number_value) : char_val
     
     case number_value
-      -100..0 :  char_val := "0"
+      0 :  char_val := "0"
       1 :  char_val := "1"
       2 :  char_val := "2"
       3 :  char_val := "3"
@@ -249,7 +249,10 @@ PRI char_from_number(number_value) : char_val
       29 : char_val := "T"
       30 : char_val := "U"
       31 : char_val := "V"
-      32..100 : char_val := "W"  
+      32 : char_val := "W"
+      33 : char_val := "X"
+      34 : char_val := "Y"
+      other : char_val := "Z"  
     return char_val
 
 PRI LCD_Display_Loop
@@ -266,15 +269,16 @@ PRI LCD_Display_Loop
 PRI display_the_pots | index
     LCD_home_then_here(0)
     'LCD.str(string(" p1="))
-    repeat index from 0 to 11
+    repeat index from 0 to 15
     'LCD.str(string(" p0="))
-      send(char_from_number(Decimal_value_of_pot(Pot[index])))
+      send(char_from_number(Thirtyfifth_value_of_pot(Pot[index])))
    
     wait_this_fraction_of_a_second(10)
 
-PRI Decimal_value_of_pot(pot_value) : the_decimal_value
+PRI Thirtyfifth_value_of_pot(pot_value) : the_decimal_value
 
-  return pot_value /25
+  return pot_value/7
+  
 {  
            case pot_value
                 0..3   :   the_decimal_value := 1 'necesary first threshhold
@@ -299,9 +303,9 @@ PRI Analog_to_Digital_Conversion | index
   wait_this_fraction_of_a_second(10)
   
   repeat
-    repeat index from 0 to 11
+    repeat index from 0 to 18
       Pot[index] := adc.Read(index)
-    wait_this_fraction_of_a_second(1000)
+    'wait_this_fraction_of_a_second(1000)
   
 {********************************************************************************************
            FREQOUTMULTI
