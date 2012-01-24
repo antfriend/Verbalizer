@@ -6,7 +6,7 @@
 '******************************************                                 ******************************************
 '*********************************************************************************************************************
 '*********************************************************************************************************************
-    ***** this is the main module *****                                         ***** this is the main module *****
+    ***** aka the "mouth organ" *****                                         ***** aka the "mouth organ" *****
       ******************************                                              ******************************
             *****************                                                           *****************
 }}
@@ -37,9 +37,9 @@ VAR
      LONG Key_State[40]'each of 37 keys' Key States(TRIGGER, SUSTAIN, RELEASE, or SILENCE), but for iterating cols x rows I use 40
      LONG QueueCount
      BYTE LCD_Display_Mode
-     LONG LCD_Stack[500]
+     LONG LCD_Stack[500]'stack space allotment
      'LONG Verbalizer_Stack[500]
-     LONG ADC_Stack[500]    
+     LONG ADC_Stack[500]'stack space allotment    
      BYTE Pot[19]
       
 OBJ
@@ -74,13 +74,13 @@ PRI initialize_pins
       dira[21..22]~~ 'set to output     
       outa[21..22]~  'set low
 
-PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key
+PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of 8
 
       LCD_Display_Mode := 0
       initialize_pins
       Verbalizations.start(@Pot)    
-      cognew(Analog_to_Digital_Conversion, @ADC_Stack)
-      cognew(LCD_Display_Loop, @LCD_Stack)
+      cognew(Analog_to_Digital_Conversion, @ADC_Stack)'start cog 2 of 8
+      cognew(LCD_Display_Loop, @LCD_Stack)'start cog 3 of 8 
       'Run_LCD
       
       repeat the_key from 0 to 38
