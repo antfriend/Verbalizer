@@ -306,7 +306,11 @@ PRI Analog_to_Digital_Conversion | index
     repeat index from 0 to 18
       Pot[index] := adc.Read(index)
     'wait_this_fraction_of_a_second(1000)
-  
+
+PRI map(da_value, da_minimum, da_maximum)
+
+  return ((da_value*(da_maximum-da_minimum))/255)+da_minimum
+
 {********************************************************************************************
            FREQOUTMULTI
 ********************************************************************************************}
