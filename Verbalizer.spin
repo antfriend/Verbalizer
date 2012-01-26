@@ -19,6 +19,7 @@ CON
 '********************************************************************
      Muh_VERSION = 5
 '********************************************************************
+
 '*** Key States ***
      'greater than 3 is the count within the debounce range 
         'DEBOUNCE= 100_000
@@ -26,12 +27,21 @@ CON
         SUSTAIN = 2
         RELEASE = 1
         SILENCE = 0
+        
 '*** adc ********************************************************
         CLK_PIN = 13
         IO_CLOCK = 23
         ADDRESS = 24
         DATA_PIN = 25
         CS_PIN = 26
+
+'*** mode *****************************************************
+        PLAY_PHONEMES = 1 
+        RECORD_PHONEMES = 2
+        PLAY_ALLOPHONES = 3
+        RECORD_ALLOPHONES = 4
+        PLAY_WORDS = 5
+        RECORD_WORDS = 6
     
 VAR
      LONG Key_State[40]'each of 37 keys' Key States(TRIGGER, SUSTAIN, RELEASE, or SILENCE), but for iterating cols x rows I use 40
@@ -41,6 +51,7 @@ VAR
      'LONG Verbalizer_Stack[500]
      LONG ADC_Stack[500]'stack space allotment    
      BYTE Pot[19]
+     BYTE verb_scope 'PHONEMES, ALLOPHONES, or WORDS
       
 OBJ
         LCD              :   "Serial_Lcd"
@@ -62,6 +73,15 @@ PRI wait_this_fraction_of_a_second(the_decimal)'1/the_decimal, e.g. 1/2, 1/4th, 
 
   waitcnt(clkfreq / the_decimal + cnt)'if the_decimal=4, then we wait 1/4 sec
 
+PRI set_verb_scope 'PHONEMES, ALLOPHONES, or WORDS
+  '                play/record   play/record    play/record
+  'verb_scope :=  'PHONEMES,     ALLOPHONES, or WORDS 
+    case Pot[13]'the mode knob
+      0..240 :
+        verb_scope := PLAY_ALLOPHONES
+      other :
+        verb_scope := RECORD_WORDS
+  
 PRI initialize_pins 
            
       'Keyboard Input ~ Keyboard_Key_Index
@@ -88,6 +108,7 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
                                                                                 
 '*****MAIN LOOP*************************************************************************************************************
       repeat 'main loop
+        set_verb_scope
         
         'wait_this_fraction_of_a_second(128)
         repeat Keyboard_Quadrant_Index from 1 to 33 step 8'iterate through the Keyboard_Quadrant_Index
@@ -114,21 +135,24 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
               else
                 Update_this_Keys_State(the_key, FALSE)
 
-        repeat the_key from 1 to 37         
-             if (Key_State[the_key] == RELEASE)'caught a release
-                 if Verbalizations.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
-                     Key_State[the_key] := SILENCE  'advance to silence
-
-        repeat the_key from 1 to 37
-             if (Key_State[the_key] == SUSTAIN)
-                Verbalizations.go_sustain(the_key)
-                
-        repeat the_key from 1 to 37       
-             if (Key_State[the_key] == TRIGGER)'caught a trigger                 
-                 if Verbalizations.go_if_available(the_key)'if this one starts a voice, then advance to SUSTAIN
-                     Key_State[the_key] := SUSTAIN  'advance to sustain
-                     
-
+        case verb_scope
+          PLAY_ALLOPHONES :                         
+                                repeat the_key from 1 to 37         
+                                     if (Key_State[the_key] == RELEASE)'caught a release
+                                         if Verbalizations.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
+                                             Key_State[the_key] := SILENCE  'advance to silence
+                                 
+                                repeat the_key from 1 to 37
+                                     if (Key_State[the_key] == SUSTAIN)
+                                        Verbalizations.go_sustain(the_key)
+                                        
+                                repeat the_key from 1 to 37       
+                                     if (Key_State[the_key] == TRIGGER)'caught a trigger                 
+                                         if Verbalizations.go_if_available(the_key)'if this one starts a voice, then advance to SUSTAIN
+                                             Key_State[the_key] := SUSTAIN  'advance to sustain
+                                             
+          RECORD_WORDS :
+                                                       
 
 '*****END MAIN LOOP*************************************************************************************************************         
      
