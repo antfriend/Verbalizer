@@ -42,16 +42,16 @@ CON
         RECORD_ALLOPHONES = 4
         PLAY_WORDS = 5
         RECORD_WORDS = 6
-    
+        MODE_POT = 12
+        
 VAR
      LONG Key_State[40]'each of 37 keys' Key States(TRIGGER, SUSTAIN, RELEASE, or SILENCE), but for iterating cols x rows I use 40
      LONG QueueCount
      BYTE LCD_Display_Mode
      LONG LCD_Stack[500]'stack space allotment
-     'LONG Verbalizer_Stack[500]
      LONG ADC_Stack[500]'stack space allotment    
      BYTE Pot[19]
-     BYTE verb_scope 'PHONEMES, ALLOPHONES, or WORDS
+     'BYTE verb_scope 'PHONEMES, ALLOPHONES, or WORDS
       
 OBJ
         LCD              :   "Serial_Lcd"
@@ -73,14 +73,24 @@ PRI wait_this_fraction_of_a_second(the_decimal)'1/the_decimal, e.g. 1/2, 1/4th, 
 
   waitcnt(clkfreq / the_decimal + cnt)'if the_decimal=4, then we wait 1/4 sec
 
-PRI set_verb_scope 'PHONEMES, ALLOPHONES, or WORDS
+PRI get_verb_scope | verb_scope, the_value 'PHONEMES, ALLOPHONES, or WORDS
   '                play/record   play/record    play/record
-  'verb_scope :=  'PHONEMES,     ALLOPHONES, or WORDS 
-    case Pot[13]'the mode knob
-      0..240 :
+  'verb_scope :=  'PHONEMES,     ALLOPHONES, or WORDS
+  the_value := Pot[MODE_POT]
+  {if(the_value < 200)
+     verb_scope := PLAY_ALLOPHONES
+  else
+     verb_scope := RECORD_WORDS
+  }
+
+    case the_value'the mode knob
+      0..99 :
         verb_scope := PLAY_ALLOPHONES
       other :
         verb_scope := RECORD_WORDS
+     
+  'verb_scope := 3   
+  return verb_scope
   
 PRI initialize_pins 
            
@@ -101,18 +111,15 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
       Verbalizations.start(@Pot)    
       cognew(Analog_to_Digital_Conversion, @ADC_Stack)'start cog 2 of 8
       cognew(LCD_Display_Loop, @LCD_Stack)'start cog 3 of 8 
-      'Run_LCD
       
       repeat the_key from 0 to 38
         Key_State[the_key] := SILENCE
                                                                                 
 '*****MAIN LOOP*************************************************************************************************************
       repeat 'main loop
-        set_verb_scope
-        
-        'wait_this_fraction_of_a_second(128)
+        wait_this_fraction_of_a_second(1000)'no need to go too fast
+         
         repeat Keyboard_Quadrant_Index from 1 to 33 step 8'iterate through the Keyboard_Quadrant_Index
-
           'All go low
           outa[14..16]~  'set low
           outa[21..22]~  'set low
@@ -135,8 +142,8 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
               else
                 Update_this_Keys_State(the_key, FALSE)
 
-        case verb_scope
-          PLAY_ALLOPHONES :                         
+        case get_verb_scope
+          3 : 'PLAY_ALLOPHONES                       
                                 repeat the_key from 1 to 37         
                                      if (Key_State[the_key] == RELEASE)'caught a release
                                          if Verbalizations.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
@@ -151,9 +158,11 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
                                          if Verbalizations.go_if_available(the_key)'if this one starts a voice, then advance to SUSTAIN
                                              Key_State[the_key] := SUSTAIN  'advance to sustain
                                              
-          RECORD_WORDS :
-                                                       
-
+          4 : 'RECORD_WORDS
+                                 repeat the_key from 1 to 37                      
+                                     if (Key_State[the_key] == TRIGGER)'caught a trigger
+                                         Verbalizations.go_test(the_key)
+                                         
 '*****END MAIN LOOP*************************************************************************************************************         
      
    
