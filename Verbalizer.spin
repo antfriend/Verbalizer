@@ -10,6 +10,7 @@
       ******************************                                              ******************************
             *****************                                                           *****************
 }}
+
 CON
 '********************************************************************
      _CLKMODE = XTAL1 + PLL16X
@@ -36,6 +37,7 @@ CON
         CS_PIN = 26
 
 '*** mode *****************************************************
+        DO_NOTHING = 0
         PLAY_PHONEMES = 1 
         RECORD_PHONEMES = 2
         PLAY_ALLOPHONES = 3
@@ -57,6 +59,7 @@ OBJ
         LCD              :   "Serial_Lcd"
         Verbalizations   :   "VerbalizeIt"
         adc              :   "TLC545C"
+        settings         :   "settings"
         
 PRI Update_this_Keys_State(the_key, is_pressed) | the_count_now
 
@@ -73,25 +76,6 @@ PRI wait_this_fraction_of_a_second(the_decimal)'1/the_decimal, e.g. 1/2, 1/4th, 
 
   waitcnt(clkfreq / the_decimal + cnt)'if the_decimal=4, then we wait 1/4 sec
 
-PRI get_verb_scope | verb_scope, the_value 'PHONEMES, ALLOPHONES, or WORDS
-  '                play/record   play/record    play/record
-  'verb_scope :=  'PHONEMES,     ALLOPHONES, or WORDS
-  the_value := Pot[MODE_POT]
-  {if(the_value < 200)
-     verb_scope := PLAY_ALLOPHONES
-  else
-     verb_scope := RECORD_WORDS
-  }
-
-    case the_value'the mode knob
-      0..99 :
-        verb_scope := PLAY_ALLOPHONES
-      other :
-        verb_scope := RECORD_WORDS
-     
-  'verb_scope := 3   
-  return verb_scope
-  
 PRI initialize_pins 
            
       'Keyboard Input ~ Keyboard_Key_Index
@@ -117,22 +101,22 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
                                                                                 
 '*****MAIN LOOP*************************************************************************************************************
       repeat 'main loop
-        wait_this_fraction_of_a_second(1000)'no need to go too fast
+        wait_this_fraction_of_a_second(1000)'no need to go much faster than super human speed
          
-        repeat Keyboard_Quadrant_Index from 1 to 33 step 8'iterate through the Keyboard_Quadrant_Index
+        repeat Keyboard_Quadrant_Index from 1 to 33 step 8 'iterate through the Keyboard_Quadrant_Index
           'All go low
           outa[14..16]~  'set low
           outa[21..22]~  'set low
-
-          case Keyboard_Quadrant_Index
-            1 : outa[15]~~  'set high
-            9 : outa[14]~~  'set high
-            17 : outa[16]~~  'set high
-            25 : outa[21]~~  'set high
-            33 : outa[22]~~  'set high
-            other : 'this can't be happening!
            
-          repeat Keyboard_Key_Index from 0 to 7 'read Keyboard_Key_Index
+          case Keyboard_Quadrant_Index '###########
+            1 : outa[15]~~  'set high  ############
+            9 : outa[14]~~  'set high  ############
+            17 : outa[16]~~  'set high  ###########
+            25 : outa[21]~~  'set high  ###########
+            33 : outa[22]~~  'set high  ###########
+            other : 'this can't be happening! #####
+           
+          repeat Keyboard_Key_Index from 0 to 7 'read Keyboard_Key_Index ****
             the_key := Keyboard_Quadrant_Index + Keyboard_Key_Index
             if (the_key < 38)'limited by number of keys
 
@@ -141,9 +125,34 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
                 
               else
                 Update_this_Keys_State(the_key, FALSE)
+          '******************************************************************
+        
+        case Thirtyfifth_value_of_pot(Pot[MODE_POT])
+          {
+          DO_NOTHING = 0
+          PLAY_PHONEMES = 1 
+          RECORD_PHONEMES = 2
+          PLAY_ALLOPHONES = 3
+          RECORD_ALLOPHONES = 4
+          PLAY_WORDS = 5
+          RECORD_WORDS = 6
+           }
+          DO_NOTHING :
+                                Verbalizations.release_test(1)
 
-        case get_verb_scope
-          3 : 'PLAY_ALLOPHONES                       
+          PLAY_PHONEMES :
+                                 repeat the_key from 1 to 37         
+                                     if (Key_State[the_key] == RELEASE)'caught a release
+                                         if Verbalizations.release_test(the_key)'if this one is stopping, then advance to SILENCE  
+                                             Key_State[the_key] := SILENCE  'advance to silence
+                                                      
+                                 repeat the_key from 1 to 37                      
+                                     if ((Key_State[the_key] == TRIGGER) OR (Key_State[the_key] == SUSTAIN))'caught a trigger
+                                         if Verbalizations.go_test(the_key)
+                                                        Key_State[the_key] := SUSTAIN
+                                                   
+          
+          PLAY_ALLOPHONES : 'PLAY_ALLOPHONES = 3                      
                                 repeat the_key from 1 to 37         
                                      if (Key_State[the_key] == RELEASE)'caught a release
                                          if Verbalizations.stop_if_available(the_key)'if this one is stopping, then advance to SILENCE  
@@ -158,11 +167,14 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
                                          if Verbalizations.go_if_available(the_key)'if this one starts a voice, then advance to SUSTAIN
                                              Key_State[the_key] := SUSTAIN  'advance to sustain
                                              
-          4 : 'RECORD_WORDS
+          RECORD_WORDS : 'RECORD_WORDS = 4
                                  repeat the_key from 1 to 37                      
                                      if (Key_State[the_key] == TRIGGER)'caught a trigger
                                          Verbalizations.go_test(the_key)
-                                         
+         OTHER :
+             'do nothing
+             Verbalizations.release_test(1)
+                                             
 '*****END MAIN LOOP*************************************************************************************************************         
      
    
