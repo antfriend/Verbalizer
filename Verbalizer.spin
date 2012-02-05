@@ -29,7 +29,7 @@ CON
         RELEASE = 1
         SILENCE = 0
         
-'*** adc ********************************************************
+'*** adc *******************************************************
         CLK_PIN = 13
         IO_CLOCK = 23
         ADDRESS = 24
@@ -38,20 +38,24 @@ CON
 
 '*** mode *****************************************************
         DO_NOTHING = 0
-        PLAY_PHONEMES = 1 
+        PLAY_PHONEMES = 3 
         RECORD_PHONEMES = 2
-        PLAY_ALLOPHONES = 3
+        PLAY_ALLOPHONES = 1
         RECORD_ALLOPHONES = 4
         PLAY_WORDS = 5
         RECORD_WORDS = 6
         MODE_POT = 12
+        MODE_S1 = 27
+        MODE_S2 = 28
         
 VAR
      LONG Key_State[40]'each of 37 keys' Key States(TRIGGER, SUSTAIN, RELEASE, or SILENCE), but for iterating cols x rows I use 40
      LONG QueueCount
      BYTE LCD_Display_Mode
+     BYTE The_Mode
      LONG LCD_Stack[500]'stack space allotment
-     LONG ADC_Stack[500]'stack space allotment    
+     LONG ADC_Stack[500]'stack space allotment
+     LONG Settings_Stack[500]'stack space allotment   
      BYTE Pot[19]
      'BYTE verb_scope 'PHONEMES, ALLOPHONES, or WORDS
       
@@ -76,8 +80,15 @@ PRI wait_this_fraction_of_a_second(the_decimal)'1/the_decimal, e.g. 1/2, 1/4th, 
 
   waitcnt(clkfreq / the_decimal + cnt)'if the_decimal=4, then we wait 1/4 sec
 
-PRI initialize_pins 
-           
+PRI initialize_pins
+
+      'mode pins
+      outa[MODE_S1]~
+      outa[MODE_S2]~
+      dira[MODE_S1]~
+      dira[MODE_S2]~     
+
+      
       'Keyboard Input ~ Keyboard_Key_Index
       outa[0..7]~ 'read pins set to low 
       dira[0..7]~ 'read pins set to input
@@ -87,9 +98,32 @@ PRI initialize_pins
       outa[14..16]~  'set low
       dira[21..22]~~ 'set to output     
       outa[21..22]~  'set low
+      
+PRI Get_this_Setting(the_setting_name)
+{
+CON
+  NET_MAC_ADDR       = "E"+("A"<<8)
+  +++++++++++++++++++++++++++++++++++++++
+ settings.setData(settings#NET_MAC_ADDR,string(02,01,01,01,01,01),6)
+ +++++++++++++++++++++++++++++++++++++++++++
+  if settings.getData(settings#NET_MAC_ADDR,@stack,6)
+    term.str(string("MAC: "))
+    repeat i from 0 to 5
+      if i
+        term.out("-")
+      term.hex(byte[@stack][i],2)
+    term.out(13)  
 
+}
+  the_setting_name := "i"+("d"<<8)
+  
+  if (settings.findKey(the_setting_name))
+      return settings.getByte(the_setting_name)
+  else
+    return 0
+      
 PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of 8
-
+      settings.start 
       LCD_Display_Mode := 0
       initialize_pins
       Verbalizations.start(@Pot)    
@@ -127,7 +161,7 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
                 Update_this_Keys_State(the_key, FALSE)
           '******************************************************************
         
-        case Thirtyfifth_value_of_pot(Pot[MODE_POT])
+        case The_Mode 'Thirtyfifth_value_of_pot(Pot[MODE_POT])
           {
           DO_NOTHING = 0
           PLAY_PHONEMES = 1 
@@ -348,6 +382,21 @@ PRI Analog_to_Digital_Conversion | index
   wait_this_fraction_of_a_second(10)
   
   repeat
+    'read the mode switch
+    
+    if(ina[MODE_S1] == 1)
+      The_Mode := PLAY_PHONEMES
+    else
+      The_Mode := PLAY_ALLOPHONES
+   
+   {   
+    if(ina[MODE_S2] == 1)
+      The_Mode := PLAY_ALLOPHONES
+    else
+      The_Mode := PLAY_PHONEMES
+    }
+    
+    'read the adc
     repeat index from 0 to 18
       Pot[index] := adc.Read(index)
     'wait_this_fraction_of_a_second(1000)
