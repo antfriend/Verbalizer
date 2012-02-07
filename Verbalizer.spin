@@ -16,7 +16,7 @@ CON
      _CLKMODE = XTAL1 + PLL16X
      _XINFREQ = 5_000_000
 '********************************************************************
-        LCD_Line = 12
+        
 '********************************************************************
      Muh_VERSION = 5
 '********************************************************************
@@ -38,29 +38,27 @@ CON
 
 '*** mode *****************************************************
         DO_NOTHING = 0
-        PLAY_PHONEMES = 3 
+        PLAY_PHONEMES = 1 
         RECORD_PHONEMES = 2
-        PLAY_ALLOPHONES = 1
+        PLAY_ALLOPHONES = 3
         RECORD_ALLOPHONES = 4
         PLAY_WORDS = 5
         RECORD_WORDS = 6
-        MODE_POT = 12
+       
         MODE_S1 = 27
         MODE_S2 = 28
         
 VAR
      LONG Key_State[40]'each of 37 keys' Key States(TRIGGER, SUSTAIN, RELEASE, or SILENCE), but for iterating cols x rows I use 40
-     LONG QueueCount
-     BYTE LCD_Display_Mode
      BYTE The_Mode
-     LONG LCD_Stack[500]'stack space allotment
+     LONG Serial_Stack[500]'stack space allotment
      LONG ADC_Stack[500]'stack space allotment
      LONG Settings_Stack[500]'stack space allotment   
      BYTE Pot[19]
      'BYTE verb_scope 'PHONEMES, ALLOPHONES, or WORDS
       
 OBJ
-        LCD              :   "Serial_Lcd"
+        serial           :   "Parallax Serial Terminal"
         Verbalizations   :   "VerbalizeIt"
         adc              :   "TLC545C"
         settings         :   "settings"
@@ -83,10 +81,11 @@ PRI wait_this_fraction_of_a_second(the_decimal)'1/the_decimal, e.g. 1/2, 1/4th, 
 PRI initialize_pins
 
       'mode pins
+      dira[MODE_S1]~
+      dira[MODE_S2]~
       outa[MODE_S1]~
       outa[MODE_S2]~
-      dira[MODE_S1]~
-      dira[MODE_S2]~     
+     
 
       
       'Keyboard Input ~ Keyboard_Key_Index
@@ -124,11 +123,11 @@ CON
       
 PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of 8
       settings.start 
-      LCD_Display_Mode := 0
       initialize_pins
-      Verbalizations.start(@Pot)    
+      Verbalizations.start(@Pot)
+      'cognew(Serial_Loop, @Serial_Stack)'start cog 3 of 8 
       cognew(Analog_to_Digital_Conversion, @ADC_Stack)'start cog 2 of 8
-      cognew(LCD_Display_Loop, @LCD_Stack)'start cog 3 of 8 
+          
       
       repeat the_key from 0 to 38
         Key_State[the_key] := SILENCE
@@ -161,7 +160,7 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
                 Update_this_Keys_State(the_key, FALSE)
           '******************************************************************
         
-        case The_Mode 'Thirtyfifth_value_of_pot(Pot[MODE_POT])
+        case The_Mode
           {
           DO_NOTHING = 0
           PLAY_PHONEMES = 1 
@@ -211,87 +210,18 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
                                              
 '*****END MAIN LOOP*************************************************************************************************************         
      
-   
-PRI Run_LCD
-    
-  if LCD.init(LCD_Line, 9600, 2)
-    wait_this_fraction_of_a_second(2) '250 milliseconds (1/4 second)
-    'clear_lcd
-    'see LCD commands at:
-    'http://cdn.shopify.com/s/files/1/0038/9582/files/LCD117_Board_Command_Summary.pdf?1260768875
-    'source:
-    'http://shop.moderndevice.com/products/16-x-2-gray-lcd-and-lcd117-kit
+PRI Serial_Loop | value
 
-    'LCD datasheet: http://cdn.shopify.com/s/files/1/0038/9582/files/MD_Blue16x2LCD_1602A.pdf?1260730783
-    
-    'LCD.str(string("?G216")) 'configure driver for 2 x 16 LCD
-    'LCD.str(string("?>3"))'enter big number mode
-    'LCD.str(string("?<"))'exit big number mode
-    'LCD.str(string("?Bff"))'Backlight Intensity 
-     'LCD.str(string("?L4"))'Low output on auxiliary digital pins 4[4,5,6]
-     'LCD.str(string("?L5"))'Low output on auxiliary digital pins 5[4,5,6]
-     'LCD.str(string("?L6"))'Low output on auxiliary digital pins 6[4,5,6]
-     'LCD.str(string("?c0"))'Set Cursor Style: 0= none 2= blinking 3=underline
-     'LCD.str(string("?!01"))'Send direct command to LCD of "01"
-     'wait_this_fraction_of_a_second(2)
-
-PRI clear_lcd
-  send("?")
-  send("f")
-
-PRI display_the_display | the_iterator
-
-   clear_lcd
-  LCD.str(string("Dan Ray presents"))
-
-  waitcnt(clkfreq / 4 + cnt)'1/4 sec
-  LCD.str(string("the "))
-
-  waitcnt(clkfreq / 64 + cnt)'1/4 sec
-  send("V")
-  waitcnt(clkfreq / 64 + cnt)'1/4 sec
-  send("E")
-  waitcnt(clkfreq / 32 + cnt)'1/4 sec
-  send("R")
-  waitcnt(clkfreq / 32 + cnt)'1/4 sec
-  send("B")
-  waitcnt(clkfreq / 32 + cnt)'1/4 sec
-  send("A")
-  waitcnt(clkfreq / 16 + cnt)'1/4 sec
-  send("L")
-  waitcnt(clkfreq / 16 + cnt)'1/4 sec
-  send("I")
-  waitcnt(clkfreq / 16 + cnt)'1/4 sec
-  send("Z")
-  waitcnt(clkfreq / 8 + cnt)'1/4 sec
-  send("E")
-  waitcnt(clkfreq / 8 + cnt)'1/4 sec
-  send("R")
-
-  'waitcnt(90_000_000 + cnt)
-  wait_this_fraction_of_a_second(4)
-    
-  LCD_home_then_here(0)
+  serial.start(115_200)
+  waitcnt(clkfreq + cnt)  
   
-  repeat the_iterator from 72 to 4 step 2 '32 segments 
-    send("*")
-    wait_this_fraction_of_a_second(the_iterator)
-                
-PRI send(this_character) 
-    LCD.str(@this_character)
-    
-PRI LCD_home_then_here(the_cursor_position)
-      send("?")'go to 
-      send("a")'home position
-      'go to cursor position
-      hop_cursor(the_cursor_position)
-      
 
-PRI hop_cursor(the_number_to_hop)
-    repeat the_number_to_hop
-      LCD.str(string("?i"))
-      'send("?")
-      'send("i")
+  repeat
+    value := serial.DecIn
+    serial.Str(String(serial#NL, serial#NL, "~~~Dan Ray presents The Verbalizer~~~"))
+    'repeat 20
+      'waitcnt(clkfreq + cnt)
+  
         
 PRI char_from_number(number_value) : char_val
     
@@ -334,26 +264,6 @@ PRI char_from_number(number_value) : char_val
       other : char_val := "Z"  
     return char_val
 
-PRI LCD_Display_Loop
-
-  Run_LCD
-  'display_the_pots
-  display_the_display
-  display_the_display
-
-  repeat
-    display_the_pots
-
-  
-PRI display_the_pots | index
-    LCD_home_then_here(0)
-    'LCD.str(string(" p1="))
-    repeat index from 0 to 15
-    'LCD.str(string(" p0="))
-      send(char_from_number(Thirtyfifth_value_of_pot(Pot[index])))
-   
-    wait_this_fraction_of_a_second(10)
-
 PRI Thirtyfifth_value_of_pot(pot_value) : the_decimal_value
 
   return pot_value/7
@@ -384,17 +294,14 @@ PRI Analog_to_Digital_Conversion | index
   repeat
     'read the mode switch
     
-    if(ina[MODE_S1] == 1)
+    if(ina[MODE_S1] == 0)
       The_Mode := PLAY_PHONEMES
     else
       The_Mode := PLAY_ALLOPHONES
    
-   {   
-    if(ina[MODE_S2] == 1)
-      The_Mode := PLAY_ALLOPHONES
-    else
-      The_Mode := PLAY_PHONEMES
-    }
+    if(ina[MODE_S2] == 0)
+      The_Mode := DO_NOTHING
+
     
     'read the adc
     repeat index from 0 to 18
