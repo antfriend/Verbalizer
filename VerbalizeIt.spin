@@ -1,6 +1,7 @@
 {{
         don't criticise it
 }}
+
 CON
      _CLKMODE = XTAL1 + PLL16X
      _XINFREQ = 5_000_000
@@ -43,9 +44,9 @@ PUB start(the_pot_pointer) | i, r
     's.start starts a new cog
     s.start(@input, @buffer, buffer_size, LEFT_STEREO_PIN, -1, RIGHT_STEREO_PIN, -1)'starts cog 8 of 8
 
-    angle[i] := 32768  '65535..32768..0 ~ L..mid..R
-    depth[i] := 100'?r & $FFF 'random depth
-    go_test(10)
+    'angle[i] := 32768  '65535..32768..0 ~ L..mid..R
+    'depth[i] := 100'?r & $FFF 'random depth
+    'go_test(10)
     
     'initialize voices
     repeat i from 0 to voices -1

@@ -113,7 +113,12 @@ PUB go_release(the_key)
       v.go(1)
 
 PUB trigger_word(the_key)
-  go_trigger_seven
+  'go_trigger_seven
+  go_blah(the_key)
+  go_null
+  'repeat 2 'fill the buffer
+    'v.go(1)'(rnd(200, 1000))
+
   
 PUB go_null
   'sOAp
