@@ -75,19 +75,15 @@ PRI Update_this_Keys_State(the_key, is_pressed) | the_count_now
        Key_State[the_key] := SILENCE 
 
 PRI wait_this_fraction_of_a_second(the_decimal)'1/the_decimal, e.g. 1/2, 1/4th, 1/10
-
   waitcnt(clkfreq / the_decimal + cnt)'if the_decimal=4, then we wait 1/4 sec
 
 PRI initialize_pins
-
       'mode pins
       dira[MODE_S1]~
       dira[MODE_S2]~
       outa[MODE_S1]~
       outa[MODE_S2]~
      
-
-      
       'Keyboard Input ~ Keyboard_Key_Index
       outa[0..7]~ 'read pins set to low 
       dira[0..7]~ 'read pins set to input
@@ -99,28 +95,15 @@ PRI initialize_pins
       outa[21..22]~  'set low
       
 PRI Get_this_Setting(the_setting_name)
-{
-CON
-  NET_MAC_ADDR       = "E"+("A"<<8)
-  +++++++++++++++++++++++++++++++++++++++
- settings.setData(settings#NET_MAC_ADDR,string(02,01,01,01,01,01),6)
- +++++++++++++++++++++++++++++++++++++++++++
-  if settings.getData(settings#NET_MAC_ADDR,@stack,6)
-    term.str(string("MAC: "))
-    repeat i from 0 to 5
-      if i
-        term.out("-")
-      term.hex(byte[@stack][i],2)
-    term.out(13)  
 
-}
   the_setting_name := "i"+("d"<<8)
   
   if (settings.findKey(the_setting_name))
       return settings.getByte(the_setting_name)
   else
     return 0
-      
+
+     
 PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of 8
       settings.start 
       initialize_pins
@@ -169,10 +152,7 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
           RECORD_ALLOPHONES = 4
           PLAY_WORDS = 5
           RECORD_WORDS = 6
-           }
-          DO_NOTHING :
-                                Verbalizations.release_test(1)
-
+           }                                                  
           PLAY_PHONEMES :
                                  repeat the_key from 1 to 37         
                                      if (Key_State[the_key] == RELEASE)'caught a release
@@ -199,12 +179,28 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
                                      if (Key_State[the_key] == TRIGGER)'caught a trigger                 
                                          if Verbalizations.go_if_available(the_key)'if this one starts a voice, then advance to SUSTAIN
                                              Key_State[the_key] := SUSTAIN  'advance to sustain
+
+          PLAY_WORDS : 'PLAY_WORDS
+                                repeat the_key from 1 to 37         
+                                     if (Key_State[the_key] == RELEASE)'caught a release
+                                         if Verbalizations.release_word(the_key)'if this one is stopping, then advance to SILENCE  
+                                             Key_State[the_key] := SILENCE  'advance to silence
+                                 
+                                repeat the_key from 1 to 37
+                                     if (Key_State[the_key] == SUSTAIN)
+                                        Verbalizations.sustain_word(the_key)
+                                        
+                                repeat the_key from 1 to 37       
+                                     if (Key_State[the_key] == TRIGGER)'caught a trigger                 
+                                         if Verbalizations.trigger_word(the_key)'if this one starts a voice, then advance to SUSTAIN
+                                             Key_State[the_key] := SUSTAIN  'advance to sustain
+
                                              
           RECORD_WORDS : 'RECORD_WORDS = 4
                                  repeat the_key from 1 to 37                      
                                      if (Key_State[the_key] == TRIGGER)'caught a trigger
                                          Verbalizations.go_test(the_key)
-         OTHER :
+          OTHER :
              'do nothing
              Verbalizations.release_test(1)
                                              
@@ -214,7 +210,6 @@ PRI Serial_Loop | value
 
   serial.start(115_200)
   waitcnt(clkfreq + cnt)  
-  
 
   repeat
     value := serial.DecIn
@@ -283,7 +278,7 @@ PRI Thirtyfifth_value_of_pot(pot_value) : the_decimal_value
                 
     return the_decimal_value        
 }
-PRI Analog_to_Digital_Conversion | index
+PRI Analog_to_Digital_Conversion | index 'and Mode switch
 
   repeat index from 0 to 18
     Pot[index] := 0
@@ -300,8 +295,7 @@ PRI Analog_to_Digital_Conversion | index
       The_Mode := PLAY_ALLOPHONES
    
     if(ina[MODE_S2] == 0)
-      The_Mode := DO_NOTHING
-
+      The_Mode := PLAY_WORDS
     
     'read the adc
     repeat index from 0 to 18
@@ -312,52 +306,4 @@ PRI map(da_value, da_minimum, da_maximum)
 
   return ((da_value*(da_maximum-da_minimum))/255)+da_minimum
 
-{********************************************************************************************
-           FREQOUTMULTI
-********************************************************************************************}
-{
-PRI Play_Tone(tone_one, tone_two, for_duration) | cog_id1, cog_id2'duration of 1 = 1/10 second
-  
-  cog_id1 := freq.start(10, 11, -1, -1, -1, -1, 218, 438, 0, 0, 0, 0)
-  cog_id2 := freq.start(10, 11, -1, -1, -1, -1, tone_one, tone_two, 0, 0, 0, 0)
-  for_duration := 2000000 *  for_duration
-  waitcnt(for_duration+cnt)
-  freq.stop(cog_id1)
-  freq.stop(cog_id2) 
-
-PRI positive_result
-    Play_Tone(880, 440, 3)
-    Play_Tone(2200, 2200, 4)
-    Play_Tone(8800, 4400, 5)
-
-PRI negative_result
-    Play_Tone(200, 400, 9)
-    waitcnt(10000000+cnt)
-    Play_Tone(200, 400, 9)
-
-PRI Play_One(a_tone) | cog_id1
-
-  cog_id1 := freq.start(10, 11, -1, -1, -1, -1, a_tone, 0, 0, 0, 0, 0)
-  
-  RETURN cog_id1
-  
-
-PRI Stop_One(cog_id1)
-  freq.stop(cog_id1)
-
-
-PRI Say_One(a_tone) | cog_id1
-
-  'cog_id1 := freq.start(10, 11, -1, -1, -1, -1, a_tone, 0, 0, 0, 0, 0)
-  cog_id1 := Verbalizations.start'(a_tone)
-  'Verbalizations.go
-  RETURN cog_id1
-  
-
-PRI Stop_Saying_This_One(cog_id1)
-  'freq.stop(cog_id1)
-  'Verbalizations.done
-  if cog_id1 > -1
-    cogstop(cog_id1)
- 
-  }              
+             
