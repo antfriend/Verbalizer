@@ -110,8 +110,7 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
       Verbalizations.start(@Pot)
       'cognew(Serial_Loop, @Serial_Stack)'start cog 3 of 8 
       cognew(Analog_to_Digital_Conversion, @ADC_Stack)'start cog 2 of 8
-          
-      
+     
       repeat the_key from 0 to 38
         Key_State[the_key] := SILENCE
                                                                                 
@@ -144,15 +143,7 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
           '******************************************************************
         
         case The_Mode
-          {
-          DO_NOTHING = 0
-          PLAY_PHONEMES = 1 
-          RECORD_PHONEMES = 2
-          PLAY_ALLOPHONES = 3
-          RECORD_ALLOPHONES = 4
-          PLAY_WORDS = 5
-          RECORD_WORDS = 6
-           }                                                  
+                                                
           PLAY_PHONEMES :
                                  repeat the_key from 1 to 37         
                                      if (Key_State[the_key] == RELEASE)'caught a release
