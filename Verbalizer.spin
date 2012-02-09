@@ -35,7 +35,7 @@ CON
         ADDRESS = 24
         DATA_PIN = 25
         CS_PIN = 26
-
+        POTS_MAX = 18
 '*** mode *****************************************************
         DO_NOTHING = 0
         PLAY_PHONEMES = 1 
@@ -204,16 +204,22 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
                                              
 '*****END MAIN LOOP*************************************************************************************************************         
      
-PRI Serial_Loop | value
+PRI Serial_Loop | index, value
 
-  serial.start(115_200)
+  serial.start(250_000)
   waitcnt(clkfreq + cnt)  
 
   repeat
     'value := serial.DecIn
-    serial.Str(String(serial#NL, serial#NL, "~~~Dan Ray presents The Verbalizer~~~"))
-    'repeat 20
-      waitcnt(clkfreq + cnt)
+    serial.Str(String(serial#CS))
+    serial.Str(String(serial#NL, serial#NL, "~~~Dan Ray presents The Verbalizer~~~", serial#NL))
+    repeat index from 0 to POTS_MAX
+      serial.Str(String(serial#NL, "knob"))
+      serial.Dec(index)
+      serial.Str(String(" = "))
+      serial.Dec(Pot[index])  
+
+    wait_this_fraction_of_a_second(2)
   
         
 PRI char_from_number(number_value) : char_val
@@ -278,7 +284,7 @@ PRI Thirtyfifth_value_of_pot(pot_value) : the_decimal_value
 }
 PRI Analog_to_Digital_Conversion | index 'and Mode switch
 
-  repeat index from 0 to 18
+  repeat index from 0 to POTS_MAX
     Pot[index] := 0
     
   adc.Start(CLK_PIN, IO_CLOCK, ADDRESS, DATA_PIN, CS_PIN)
@@ -296,7 +302,7 @@ PRI Analog_to_Digital_Conversion | index 'and Mode switch
       The_Mode := PLAY_WORDS
     
     'read the adc
-    repeat index from 0 to 18
+    repeat index from 0 to POTS_MAX
       Pot[index] := adc.Read(index)
     'wait_this_fraction_of_a_second(1000)
 
