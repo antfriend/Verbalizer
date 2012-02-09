@@ -51,17 +51,19 @@ CON
 VAR
      LONG Key_State[40]'each of 37 keys' Key States(TRIGGER, SUSTAIN, RELEASE, or SILENCE), but for iterating cols x rows I use 40
      BYTE The_Mode
-     LONG Serial_Stack[500]'stack space allotment
-     LONG ADC_Stack[500]'stack space allotment
-     LONG Settings_Stack[500]'stack space allotment   
+     LONG Serial_Stack[100]'stack space allotment
+     LONG ADC_Stack[20]'stack space allotment
+     LONG Settings_Stack[100]'stack space allotment   
      BYTE Pot[19]
      'BYTE verb_scope 'PHONEMES, ALLOPHONES, or WORDS
+     'long  Stack[32]
       
 OBJ
         serial           :   "Parallax Serial Terminal"
         Verbalizations   :   "VerbalizeIt"
         adc              :   "TLC545C"
         settings         :   "settings"
+        'Stk              :   "Stack Length"
         
 PRI Update_this_Keys_State(the_key, is_pressed) | the_count_now
 
@@ -102,15 +104,20 @@ PRI Get_this_Setting(the_setting_name)
       return settings.getByte(the_setting_name)
   else
     return 0
-
      
 PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of 8
+
+      'Stk.Init(@ADC_Stack, 32)'stack
+      cognew(Serial_Loop, @Serial_Stack)'start cog 3 of 8
       settings.start 
       initialize_pins
       Verbalizations.start(@Pot)
-      'cognew(Serial_Loop, @Serial_Stack)'start cog 3 of 8 
+      'Stk.GetLength(30, 19200) 
+       
       cognew(Analog_to_Digital_Conversion, @ADC_Stack)'start cog 2 of 8
-     
+      'waitcnt(clkfreq * 2 + cnt)
+      'Stk.GetLength(30, 19200)
+      
       repeat the_key from 0 to 38
         Key_State[the_key] := SILENCE
                                                                                 
@@ -203,10 +210,10 @@ PRI Serial_Loop | value
   waitcnt(clkfreq + cnt)  
 
   repeat
-    value := serial.DecIn
+    'value := serial.DecIn
     serial.Str(String(serial#NL, serial#NL, "~~~Dan Ray presents The Verbalizer~~~"))
     'repeat 20
-      'waitcnt(clkfreq + cnt)
+      waitcnt(clkfreq + cnt)
   
         
 PRI char_from_number(number_value) : char_val

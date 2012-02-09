@@ -6,7 +6,7 @@ CON
      _CLKMODE = XTAL1 + PLL16X
      _XINFREQ = 5_000_000
 
-        voices = 4              'voices can be 1..4
+        voices = 3              'voices can be 1..4
         buffer_size = 4096     '$1000 spatializer buffer size (16 to 4096 longs) default=$1000
 
         LEFT_STEREO_PIN = 11 'lpos_pin
@@ -38,21 +38,15 @@ PUB start(the_pot_pointer) | i, r
       'each voice is not on a new cog, but each subsequent vocal tract is 
       input[i] := v[i].start(pot_pointer) 'starts cogs 4,5,6,7 of 8
 
-    knobs :=  %000_011_100_101
-    'Set_Knobs_Value 
-    
     's.start starts a new cog
     s.start(@input, @buffer, buffer_size, LEFT_STEREO_PIN, -1, RIGHT_STEREO_PIN, -1)'starts cog 8 of 8
-
-    'angle[i] := 32768  '65535..32768..0 ~ L..mid..R
-    'depth[i] := 100'?r & $FFF 'random depth
-    'go_test(10)
-    
+   
     'initialize voices
     repeat i from 0 to voices -1
       key_index[i] := 100
       angle[i] := 32768  '65535..32768..0 ~ L..mid..R
       depth[i] := 100'?r & $FFF 'random depth
+      'knobs :=  %000_011_100_101
       Set_Knobs_Value
       v[i].go_null
 
