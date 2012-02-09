@@ -218,7 +218,8 @@ PRI Serial_Loop | index, value
       serial.Dec(index)
       serial.Str(String(" = "))
       serial.Dec(Pot[index])  
-
+      serial.Str(String(", "))
+      serial.Dec(Thirtyfifth_value_of_pot(Pot[index]))
     wait_this_fraction_of_a_second(2)
   
         

@@ -147,8 +147,20 @@ PRI Select_Allophone(the_pot_value, the_key)
        6 : hOt
        7 : boRRow
        8 : baLL
-       9 : go_blah(the_key)
-      10 : go_sustain_ah(the_key)
+       9 : formants_ee
+      10 : formants_i
+      11 : formants_e
+      12 : formants_a
+      13 : formants_o
+      14 : formants_oh 'oh   foot boot r    l    uh 
+      15 : formants_foot
+      16 : formants_boot
+      17 : formants_r
+      18 : formants_l
+      19 : formants_uh
+       
+      34 : go_blah(the_key)
+      35 : go_sustain_ah(the_key)
 
       other : play_the_key(the_key)
       
@@ -395,4 +407,93 @@ PRI Convert_Pot_0_to_12 (the_value)
 
 PRI Convert_Pot_0_to_10 (the_value)
   return the_value /25
+
+PRI formants_ee
+  set(0)
+    ga_wrapper(30)
+    aa := 0
+    fa := 0
+
+PRI formants_i
+  set(1)
+    ga_wrapper(30)
+    aa := 0
+    fa := 0
+
+PRI formants_e
+  set(2)
+    ga_wrapper(30)
+    aa := 0
+    fa := 0
+
+PRI formants_a
+  set(3)
+    ga_wrapper(30)
+    aa := 0
+    fa := 0
+
+PRI formants_o
+  set(4)
+    ga_wrapper(30)
+    aa := 0
+    fa := 0
+
+PRI formants_oh
+  set(5)
+    ga_wrapper(30)
+    aa := 0
+    fa := 0
+
+PRI formants_foot
+  set(6)
+    ga_wrapper(30)
+    aa := 0
+    fa := 0
+
+PRI formants_boot
+  set(7)
+    ga_wrapper(30)
+    aa := 0
+    fa := 0
+
+PRI formants_r
+  set(8)
+    ga_wrapper(30)
+    aa := 0
+    fa := 0
+
+PRI formants_l
+  set(9)
+    ga_wrapper(30)
+    aa := 0
+    fa := 0
+
+PRI formants_uh
+  set(10)
+    ga_wrapper(30)
+    aa := 0
+    fa := 0
+  
+PRI set(i) | jj
+    jj := 19   -7
+    f1 := (f1s[i] + jj/2) / jj
+    f2 := (f2s[i] + jj/2) / jj
+    f3 := (f3s[i] + jj/2) / jj
+    f4 := (f4s[i] + jj/2) / jj
+
+
+PRI set_dat_formants(sf1,sf2,sf3,sf4)|jj
+    jj := 19   -7
+    f1 := (sf1 + jj/2) / jj  <# 255
+    f2 := (sf2 + jj/2) / jj  <# 255
+    f3 := (sf3 + jj/2) / jj  <# 255
+    f4 := (sf4 + jj/2) / jj  <# 255
+
+DAT
+
+        '     ee   i    e    a    o    oh   foot boot r    l    uh
+f1s     long  0280,0450,0550,0700,0775,0575,0425,0275,0560,0560,0700
+f2s     long  2040,2060,1950,1800,1100,0900,1000,0850,1200,0820,1300
+f3s     long  3040,2700,2600,2550,2500,2450,2400,2400,1500,2700,2600
+f4s     long  3600,3570,3400,3400,3500,3500,3500,3500,3050,3600,3100
  
