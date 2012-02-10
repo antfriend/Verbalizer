@@ -106,21 +106,25 @@ PRI Get_this_Setting(the_setting_name)
      
 PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key, serial_count 'starts cog 1 of 8
 
-      'Stk.Init(@Serial_Stack, 32)'stack
-      serial_started := FALSE
-      'settings.start 
-      initialize_pins
-      Verbalizations.start(@Pot)
-      'Stk.GetLength(30, 19200) 
-       
+initialize_pins
+      'Stk.Init(@ADC_Stack, 32)'stack
       cognew(Analog_to_Digital_Conversion, @ADC_Stack)'start cog 2 of 8
-      'cognew(Serial_Loop, @Serial_Stack)'start cog 3 of 8
-      if(serial_started == TRUE)
-        serial.start(250_000)
-      
+      wait_this_fraction_of_a_second(5)
       'waitcnt(clkfreq * 2 + cnt)
       'Stk.GetLength(30, 250000)
       
+      if(The_Mode == PLAY_PHONEMES)'if the switch is down, serial will run
+         serial_started := TRUE
+      else
+         serial_started := FALSE
+        
+      'settings.start 
+      
+      Verbalizations.start(@Pot)        
+
+      if(serial_started == TRUE)
+        serial.start(250_000)
+    
       repeat the_key from 0 to 38
         Key_State[the_key] := SILENCE
                                                                                 

@@ -486,7 +486,31 @@ PRI set_dat_formants(sf1,sf2,sf3,sf4)|jj
     f2 := (sf2 + jj/2) / jj  <# 255
     f3 := (sf3 + jj/2) / jj  <# 255
     f4 := (sf4 + jj/2) / jj  <# 255
+{
+Allophone Knobs
 
+********BEER
+knob0 = 0, 0
+knob1 = 0, 0
+knob2 = 255, 36
+knob3 = 47, 6
+knob4 = 165, 23
+knob5 = 31, 4
+knob6 = 14, 2
+knob7 = 105, 15
+knob8 = 8, 1
+knob9 = 115, 16
+knob10 = 118, 16
+knob11 = 95, 13
+knob12 = 0, 0
+knob13 = 3, 0
+knob14 = 3, 0
+knob15 = 74, 10
+knob16 = 10, 1
+knob17 = 3, 0
+knob18 = 3, 0
+
+}
 DAT
 
         '     ee   i    e    a    o    oh   foot boot r    l    uh
