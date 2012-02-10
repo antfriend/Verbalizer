@@ -98,8 +98,7 @@ PUB go_release(the_key)
     
     vp := Convert_Pot_1_to_85(byte[the_pot_list_address][15])  '1 'rnd(4, 48)  
     vr := Convert_Pot_1_to_85(byte[the_pot_list_address][16]) '80 'rnd(4, 52) 
-      
-    
+   
     Select_Allophone(byte[the_pot_list_address][10], the_key)
     'always set gp before calling ga_wrapper
     ga_wrapper(Convert_Pot_1_to_85(byte[the_pot_list_address][14]))
@@ -118,8 +117,7 @@ PUB trigger_word(the_key)
   go_null
   'repeat 2 'fill the buffer
     'v.go(1)'(rnd(200, 1000))
-
-  
+ 
 PUB go_null
   'sOAp
   

@@ -51,12 +51,11 @@ CON
 VAR
      LONG Key_State[40]'each of 37 keys' Key States(TRIGGER, SUSTAIN, RELEASE, or SILENCE), but for iterating cols x rows I use 40
      BYTE The_Mode
-     LONG Serial_Stack[100]'stack space allotment
      LONG ADC_Stack[20]'stack space allotment
-     LONG Settings_Stack[100]'stack space allotment   
+     LONG Settings_Stack[20]'stack space allotment   
      BYTE Pot[19]
-     'BYTE verb_scope 'PHONEMES, ALLOPHONES, or WORDS
-     'long  Stack[32]
+     BYTE serial_progress
+     LONG serial_started
       
 OBJ
         serial           :   "Parallax Serial Terminal"
@@ -105,26 +104,40 @@ PRI Get_this_Setting(the_setting_name)
   else
     return 0
      
-PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of 8
+PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key, serial_count 'starts cog 1 of 8
 
-      'Stk.Init(@ADC_Stack, 32)'stack
-      cognew(Serial_Loop, @Serial_Stack)'start cog 3 of 8
-      settings.start 
+      'Stk.Init(@Serial_Stack, 32)'stack
+      serial_started := FALSE
+      'settings.start 
       initialize_pins
       Verbalizations.start(@Pot)
       'Stk.GetLength(30, 19200) 
        
       cognew(Analog_to_Digital_Conversion, @ADC_Stack)'start cog 2 of 8
+      'cognew(Serial_Loop, @Serial_Stack)'start cog 3 of 8
+      if(serial_started == TRUE)
+        serial.start(250_000)
+      
       'waitcnt(clkfreq * 2 + cnt)
-      'Stk.GetLength(30, 19200)
+      'Stk.GetLength(30, 250000)
       
       repeat the_key from 0 to 38
         Key_State[the_key] := SILENCE
                                                                                 
 '*****MAIN LOOP*************************************************************************************************************
       repeat 'main loop
-        wait_this_fraction_of_a_second(1000)'no need to go much faster than super human speed
-         
+      
+        'no need to go much faster than super human speed
+        if(serial_started == TRUE)
+          serial_count++
+          if(serial_count > 75)
+            serial_count := 0
+            Serial_Loop
+          else
+            wait_this_fraction_of_a_second(1000)
+        else
+           wait_this_fraction_of_a_second(1000)
+            
         repeat Keyboard_Quadrant_Index from 1 to 33 step 8 'iterate through the Keyboard_Quadrant_Index
           'All go low
           outa[14..16]~  'set low
@@ -204,25 +217,35 @@ PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key 'starts cog 1 of
                                              
 '*****END MAIN LOOP*************************************************************************************************************         
      
-PRI Serial_Loop | index, value
+PRI Serial_Loop | index
 
-  serial.start(250_000)
-  waitcnt(clkfreq + cnt)  
-
-  repeat
-    'value := serial.DecIn
-    serial.Str(String(serial#CS))
-    serial.Str(String(serial#NL, serial#NL, "~~~Dan Ray presents The Verbalizer~~~", serial#NL))
-    repeat index from 0 to POTS_MAX
-      serial.Str(String(serial#NL, "knob"))
-      serial.Dec(index)
-      serial.Str(String(" = "))
-      serial.Dec(Pot[index])  
-      serial.Str(String(", "))
-      serial.Dec(Thirtyfifth_value_of_pot(Pot[index]))
-    wait_this_fraction_of_a_second(2)
-  
-        
+  'serial.start(250_000)
+    'waitcnt(clkfreq + cnt)  
+     
+    'repeat
+      'value := serial.DecIn
+      serial.Str(String(serial#CS))
+      serial.Str(String(serial#NL, serial#NL, "~~~Dan Ray presents The Verbalizer~~~", serial#NL))
+      serial_progress++
+      if(serial_progress > 16)
+        serial_progress := 1
+      serial.Str(String(serial#NL))
+      repeat serial_progress
+        serial.Str(String("*"))
+         
+      repeat index from 0 to POTS_MAX
+        serial.Str(String(serial#NL, "knob"))
+        serial.Dec(index)
+        serial.Str(String(" = "))
+        serial.Dec(Pot[index])  
+        serial.Str(String(", "))
+        serial.Dec(Thirtyfifth_value_of_pot(Pot[index]))
+ 
+      'wait_this_fraction_of_a_second(2)
+  'else
+    'end this cog?
+    'cogstop
+            
 PRI char_from_number(number_value) : char_val
     
     case number_value
