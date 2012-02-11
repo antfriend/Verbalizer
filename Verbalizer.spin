@@ -85,15 +85,15 @@ PRI initialize_pins
       outa[MODE_S1]~
       outa[MODE_S2]~
      
-      'Keyboard Input ~ Keyboard_Key_Index
-      outa[0..7]~ 'read pins set to low 
-      dira[0..7]~ 'read pins set to input
+      'Keyboard ~ Keyboard_Key_Index
+      outa[0..7]~~  'key pins set                       'PU~PU~PU~PU~ 
+      dira[0..7]~~ 'key pins set                       'PU~PU~PU~PU~
       
-      'Keyboard Output ~ Keyboard_Quadrant_Index
-      dira[14..16]~~ 'set to output     
-      outa[14..16]~  'set low
-      dira[21..22]~~ 'set to output     
-      outa[21..22]~  'set low
+      'Keyboard ~ Keyboard_Quadrant_Index
+      dira[14..16]~ 'quadrant set                     'PU~PU~PU~PU~
+      outa[14..16]~~  'quadrant set                     'PU~PU~PU~PU~
+      dira[21..22]~ 'quadrant set                     'PU~PU~PU~PU~
+      outa[21..22]~~  'quadrant set                     'PU~PU~PU~PU~
       
 PRI Get_this_Setting(the_setting_name)
 
@@ -104,7 +104,7 @@ PRI Get_this_Setting(the_setting_name)
   else
     return 0
      
-PUB MAIN | Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key, serial_count 'starts cog 1 of 8
+PUB MAIN | Quadrant_Pin, Keyboard_Quadrant_Index, Keyboard_Key_Index, the_key, serial_count 'starts cog 1 of 8
 
 initialize_pins
       'Stk.Init(@ADC_Stack, 32)'stack
@@ -130,41 +130,54 @@ initialize_pins
                                                                                 
 '*****MAIN LOOP*************************************************************************************************************
       repeat 'main loop
-      
-        'no need to go much faster than super human speed
+
         if(serial_started == TRUE)
           serial_count++
           if(serial_count > 75)
             serial_count := 0
             Serial_Loop
           else
-            wait_this_fraction_of_a_second(1000)
+            wait_this_fraction_of_a_second(500)'to avoid keybounce
         else
-           wait_this_fraction_of_a_second(1000)
-            
-        repeat Keyboard_Quadrant_Index from 1 to 33 step 8 'iterate through the Keyboard_Quadrant_Index
+           wait_this_fraction_of_a_second(500)'to avoid keybounce
+           
+        '******************************************************************    
+        {repeat Keyboard_Quadrant_Index from 1 to 33 step 8 'iterate through the Keyboard_Quadrant_Index
           'All go low
-          outa[14..16]~  'set low
-          outa[21..22]~  'set low
+          'outa[14..16]~~  'set ### 'PU~PU~PU~PU~PU~PU~PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down
+          'outa[21..22]~~  'set ### 'PU~PU~PU~PU~PU~PU~PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down
            
-          case Keyboard_Quadrant_Index '###########
-            1 : outa[15]~~  'set high  ############
-            9 : outa[14]~~  'set high  ############
-            17 : outa[16]~~  'set high  ###########
-            25 : outa[21]~~  'set high  ###########
-            33 : outa[22]~~  'set high  ###########
-            other : 'this can't be happening! #####
+          case Keyboard_Quadrant_Index '###########  'PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down
+            1 : Quadrant_Pin := 15 'outa[15]~   'set high  ############  'PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down
+            9 : Quadrant_Pin := 14 'outa[14]~   'set high  ############  'PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down
+            17 : Quadrant_Pin := 16 'outa[16]~   'set high  ###########  'PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down
+            25 : Quadrant_Pin := 21 'outa[21]~   'set high  ###########  'PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down
+            33 : Quadrant_Pin := 22 'outa[22]~   'set high  ###########  'PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down
+            other : 'this can't be happening! #####  'PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down
+        }
            
-          repeat Keyboard_Key_Index from 0 to 7 'read Keyboard_Key_Index ****
+        repeat Keyboard_Key_Index from 0 to 7 'read Keyboard_Key_Index ****
+          'All go low
+          outa[0..7]~~
+          outa[Keyboard_Key_Index]~
+       
+          repeat Keyboard_Quadrant_Index from 1 to 33 step 8
+            case Keyboard_Quadrant_Index
+                                1 : Quadrant_Pin := 15 'outa[15]~   'set high  ############  'PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down
+                                9 : Quadrant_Pin := 14 'outa[14]~   'set high  ############  'PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down
+                                17 : Quadrant_Pin := 16 'outa[16]~   'set high  ###########  'PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down
+                                25 : Quadrant_Pin := 21 'outa[21]~   'set high  ###########  'PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down
+                                33 : Quadrant_Pin := 22 'outa[22]~   'set high  ###########  'PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down
+                                                 
             the_key := Keyboard_Quadrant_Index + Keyboard_Key_Index
             if (the_key < 38)'limited by number of keys
-
-              if(ina[Keyboard_Key_Index] == 1)
-                Update_this_Keys_State(the_key, TRUE)
+         
+              if(ina[Quadrant_Pin] == 0) 
+                Update_this_Keys_State(the_key, TRUE)'PU~PU~PU~PU~PU~PU~PU~PU~PU~PullUp~or~Pull~Down 
                 
               else
-                Update_this_Keys_State(the_key, FALSE)
-          '******************************************************************
+                Update_this_Keys_State(the_key, FALSE)'PU~PU~PU~PU~PU~PU~PU~PU~PU~Pull~Up~or~Pull~Down 
+        '******************************************************************
         
         case The_Mode
                                                 
