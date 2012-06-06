@@ -1,5 +1,6 @@
 {{'**************************************************
   One of up to Four VocalTract module Voices, Used in the VerbalizeIt module
+  Dan Ray
 }}'**************************************************
 
 CON
