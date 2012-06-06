@@ -97,18 +97,18 @@ PUB go_release(the_key)
 }' ******************************
     'the_key := 1
     
-    vp := Convert_Pot_1_to_85(byte[the_pot_list_address][15])  '1 'rnd(4, 48)  
-    vr := Convert_Pot_1_to_85(byte[the_pot_list_address][16]) '80 'rnd(4, 52) 
+    vp := Convert_Pot_1_to_85(byte[the_pot_list_address][14])  '1 'rnd(4, 48)  
+    vr := Convert_Pot_1_to_85(byte[the_pot_list_address][15]) '80 'rnd(4, 52) 
    
     Select_Allophone(byte[the_pot_list_address][10], the_key)
     'always set gp before calling ga_wrapper
-    ga_wrapper(Convert_Pot_1_to_85(byte[the_pot_list_address][14]))
+    ga_wrapper(Convert_Pot_1_to_85(byte[the_pot_list_address][13]))
     v.go(byte[the_pot_list_address][11]*2)'50
     
     'now quickly go to silence
     bEEt_to_silence
     v.go(10)'50
-     
+    setformants(310, 2000, 3100, 3700) 
     repeat 6
       v.go(1)
 
@@ -291,6 +291,8 @@ PRI ga_wrapper(the_value) | the_pitch
     the_pitch := the_pitch / 2
     if (the_value > the_pitch)
       ga := the_value - the_pitch
+      if (ga < 0)
+        ga := 0 
     else
       ga := the_value
 
@@ -307,11 +309,11 @@ PRI set_gp_to_pitch(the_key)|the_pitch
  
 PRI bEEt_to_silence    
     'setformants(310, 2000, 3100, 3700)'like bEEt
-    bEEt
+    'bEEt
     ga_wrapper(0)
     aa := 0
-    fa := 0
-    na := 0
+    'fa := 0
+    'na := 0
     
 PRI sOAp
     setformants(530, 950, 2400, 3200)                   'sOAp

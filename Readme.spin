@@ -40,7 +40,7 @@ Readme.spin
   knob one sets duration of the word
   only one word set - planning to make each of the three knob areas
   control three different words on the respective areas of the keyboard
-
+  
 
 ***CONTROL MODE: Trigger Sustain Release****************************
 
@@ -58,10 +58,18 @@ Readme.spin
 
 
 ***CONTROL MODE: Formants*******************************************
-  this is the most difficult mode
+  this is the most difficult mode 
+  ~ powering on while in this mode will cause the verbalizer to attempt
+  to connect to a serial terminal on the usb port ~ power on in a different
+  mode if not connecting to a serial terminal ~
   the knobs correspond to the 13 formants of speech, listed and
   illustrated in VocalTract.spin and printed and displayed on the
-  verbalizer body
+  verbalizer body - it is easy to make noise in this mode, but hard to
+  make good verbalizations however, in this mode, you should be able to make
+  any sound or part of a word that humans can create and many that we cant
+  the plan is to add the ability to save formant mode creations as additional
+  phonemes available for the trigger, sustain, and release mode
+  
    
 
 
